@@ -21,13 +21,12 @@ public class Sky {
 	 */
 	public static Logger logger = Logger.getLogger(Sky.class.getName()); 
 	
-	private ItemPool envItemPool;
-	private ItemPool envItemCache;
-	private TemplatePool envGroupCache; // store other's request.
-	private TemplatePool envGroupPool;	//store own's envGroup
-//	private ArrayList<MatchItem> judgeList;//??? not used 
+	private ItemPool item_pool;
+	private ItemPool item_cache;
+	private TemplatePool template_pool; // store other's request.
+	private TemplatePool template_cache;	//store own's envGroup
 	private NetWorker networker;
-	private Timer cleaner;
+	private Timer garbage_collector;
 	
 
 	
@@ -37,65 +36,65 @@ public class Sky {
 	 */
 	private Sky() {
 		networker = new NetWorker();
-		envItemPool = new ItemPool();
-		envItemCache = new ItemPool();
-		envGroupCache = new TemplatePool();
-		envGroupPool = new TemplatePool();
+		item_pool = new ItemPool();
+		item_cache = new ItemPool();
+		template_pool = new TemplatePool();
+		template_cache = new TemplatePool();
 		
 	}
 
 	/**
 	 * write an Item into ENV
-	 * @param ei
+	 * @param it
 	 */
-	public void write(Item ei) {
-		envItemSended ++;
+	public void write(Item it) {
+		stat_item_sended ++;
 		//handle old groups.
-		if (!handleNewEnvItem(ei, true)) {
-			Sky.logger.fine("adding Item into pool:"+ei);
-			envItemPool.add(ei);//did not acquired
+		if (!handleNewEnvItem(it, true)) {
+			Sky.logger.fine("adding Item into pool:"+it);
+			item_pool.add(it);//did not acquired
 		}
 	}
 
 	/**
 	 * send an Template into ENV
-	 * @param eg
+	 * @param tmpl
 	 */
-	public void sendRequest(Template eg) {
-		envGroupSended ++;
-		envGroupPool.add(eg);
-		networker.sendDataToEnviroment(eg.pack());
+	public void sendRequest(Template tmpl) {
+		stat_template_sended ++;
+		template_cache.add(tmpl);
+		networker.sendDataToEnviroment(tmpl.pack());
 	}
 	
 	/**
-	 * function for handling requst received from other node.
-	 * @param eg
+	 * function for handling requst recitved from other node.
+	 * @param tmpl
 	 */
-	public void handleRequest(Template eg) {
-		envGroupReceived++;
-		Sky.logger.entering("ENV", "handle_request", eg);
-		Item ei = envItemPool.getMatch(eg);
-		if (ei == null) {//not in pool ,trying cache.
+	public void handleRequest(Template tmpl) {
+		stat_template_received++;
+		Sky.logger.entering("ENV", "handle_request", tmpl);
+		Item it = item_pool.getMatch(tmpl);
+		if (it == null) {//not in pool ,trying cache.
 			Sky.logger.fine("no match in envItemPool");
-			ei = envItemCache.getMatch(eg);
-			if (ei == null) { //not in the cache either.put it in buffer.
+			it = item_cache.getMatch(tmpl);
+			if (it == null) { //not in the cache itther.put it in buffer.
 				Sky.logger.fine("no match in envItemCache");
-				envGroupCache.add(eg);
+				template_pool.add(tmpl);
 			} else {//got a match in cache
-				Sky.logger.fine("get match in envItemCache:"+ei);
-				networker.sendResult(ei,eg,false);
+				Sky.logger.fine("get match in envItemCache:"+it);
+				networker.sendResult(it,tmpl,false);
 			}
 		} else {//got a match in pool
-			Sky.logger.fine("get match in envItemPool:"+ei);
-			if (eg.isAcquire()) {
-				envItemPool.lock(ei);
-				if (networker.sendResult(ei,eg,true)) {
-					envItemPool.remove(ei);
+			Sky.logger.fine("get match in envItemPool:"+it);
+			if (tmpl.isAcquire()) {
+				item_pool.lock(it);
+				if (networker.sendResult(it,tmpl,true)) {
+					item_pool.remove(it);
 				} else {
-					envItemPool.unlock(ei);
+					item_pool.unlock(it);
 				}
 			} else {//subscribe do not need to know target want it
-				networker.sendResult(ei,eg,true);
+				networker.sendResult(it,tmpl,true);
 			}
 		}
 		Sky.logger.exiting("ENV", "handle_request");
@@ -103,25 +102,25 @@ public class Sky {
 	
 	/**
 	 * function for handling result of request it send out.
-	 * @param ei
+	 * @param it
 	 * @return 
 	 */
-	public boolean handleResult(Item ei,Template eg) {
-		envItemReceived ++;
-		Sky.logger.info("get Item "+ ei + " for Template:"+eg);
-		Template neg = envGroupPool.get(eg);
-		if (neg != null) {
+	public boolean handleResult(Item it,Template tmpl) {
+		stat_item_received ++;
+		Sky.logger.info("get Item "+ it + " for Template:"+tmpl);
+		Template ntmpl = template_cache.get(tmpl);
+		if (ntmpl != null) {
 			Sky.logger.info("####################\nEnvGroup get a match:\n"
-						+ neg + "\n-----\n" + ei+"\n#######################\n");
-			//System.out.println(neg.owner.getAction());
-			if (neg.isMany()) {
-				envGroupPool.addMatch(ei,neg);
+						+ ntmpl + "\n-----\n" + it+"\n#######################\n");
+			//System.out.println(ntmpl.owner.getAction());
+			if (ntmpl.isMany()) {
+				template_cache.addMatch(it,ntmpl);
 			} else {
-				Template.default_callback.callback(neg,ei);
-				envGroupPool.remove(neg);
+				Template.default_callback.callback(ntmpl,it);
+				template_cache.remove(ntmpl);
 			}
-			envItemCache.add(ei);
-			handleNewEnvItem(ei, false);
+			item_cache.add(it);
+			handleNewEnvItem(it, false);
 			return true;
 		}
 		Sky.logger.finer("do not have this Template any more");
@@ -129,64 +128,64 @@ public class Sky {
 	}
 	/**
 	 * 处理新加入EnvItem的情况
-	 * @param ei
+	 * @param it
 	 * @param isFromOwner
 	 * @return 返回新加入的是否被成功acquire了
 	 */
-	private boolean handleNewEnvItem(Item ei,boolean isFromOwner) {
-		Collection<Template> egs = envGroupCache.getMatch(ei);
+	private boolean handleNewEnvItem(Item it,boolean isFromOwner) {
+		Collection<Template> tmpls = template_pool.getMatch(it);
 		Template  ac = null;
-		for(Template eg:egs) {
-			if (!eg.isAcquire()) {
-				if (!networker.sendResult(ei, eg, true) && !eg.isMany()) {
-					envGroupCache.add(eg);//target do not want this to end.
+		for(Template tmpl:tmpls) {
+			if (!tmpl.isAcquire()) {
+				if (!networker.sendResult(it, tmpl, true) && !tmpl.isMany()) {
+					template_pool.add(tmpl);//target do not want this to end.
 				}
 			} else {
-				if (ac == null || eg.prior(ac)) {
-					ac = eg;
+				if (ac == null || tmpl.prior(ac)) {
+					ac = tmpl;
 				} else {
-					if (!eg.isMany()) {
-						envGroupCache.add(eg);
+					if (!tmpl.isMany()) {
+						template_pool.add(tmpl);
 					}
 				}
 			}
 		}
 		if (ac != null) {
-			if (networker.sendResult(ei, ac, true)) {
+			if (networker.sendResult(it, ac, true)) {
 				return true;
 			} else if (!ac.isMany()) {
-				envGroupCache.add(ac);
+				template_pool.add(ac);
 			}
 		}
 		return false;
 	}
 
 	/**
-	 * eg获取的是ei的cache，需要向ei的owner发出请求
-	 * @param ei
-	 * @param eg
+	 * tmpl获取的是it的cache，需要向it的owner发出请求
+	 * @param it
+	 * @param tmpl
 	 */
-	public void handleCacheAcquireResult(Item ei, Template eg) {
-		Template neg = envGroupPool.get(eg);
-		if (neg != null) {		
-			Item new_ei = networker.acquireEnvItem(ei, neg);
-			if (new_ei != null) {
-				handleResult(new_ei,eg);
+	public void handleCacheAcquireResult(Item it, Template tmpl) {
+		Template ntmpl = template_cache.get(tmpl);
+		if (ntmpl != null) {		
+			Item new_it = networker.acquireEnvItem(it, ntmpl);
+			if (new_it != null) {
+				handleResult(new_it,tmpl);
 			}
 		}
 	}
 
-	public Item acquireFromPool(Item ei, Template eg) {
-		Item nei = envItemPool.get(ei);
-		if (nei != null)
-			envItemPool.lock(nei);
+	public Item acquireFromPool(Item it, Template tmpl) {
+		Item nit = item_pool.get(it);
+		if (nit != null)
+			item_pool.lock(nit);
 		
-		return nei;
+		return nit;
 	}
 
-	public void confirmAcquire(Item ei, boolean accept) {
+	public void confirmAcquire(Item it, boolean accept) {
 		if (accept) {
-			envItemPool.remove(ei);
+			item_pool.remove(it);
 		}
 	}
 
@@ -197,16 +196,16 @@ public class Sky {
 		logger.info("START service!");
 		networker.startRequestListener(this);
 		networker.startResponseListener(this);
-		cleaner = new Timer("Element Cleaner",true);
-		cleaner.scheduleAtFixedRate(new TimerTask() {
+		garbage_collector = new Timer("Element Cleaner",true);
+		garbage_collector.scheduleAtFixedRate(new TimerTask() {
 			
 			@Override
 			public void run() {
 				try {
-					envItemPool.buryDead();
-					envItemCache.buryDead();
-					envGroupCache.buryDead();
-					envGroupPool.buryDead();
+					item_pool.buryDead();
+					item_cache.buryDead();
+					template_pool.buryDead();
+					template_cache.buryDead();
 				} catch (NullPointerException e) {
 					System.out.println("NULL pointer here");
 				}
@@ -221,50 +220,50 @@ public class Sky {
 		logger.info("STOP service!");
 		networker.stopRequestListener();
 		networker.stopResponseListener();
-		cleaner.cancel();
+		garbage_collector.cancel();
 	}
 	
-	private int envItemSended = 0;
-	private int envItemReceived = 0;
-	private int envGroupSended = 0;
-	private int envGroupReceived = 0;
+	private int stat_item_sended = 0;
+	private int stat_item_received = 0;
+	private int stat_template_sended = 0;
+	private int stat_template_received = 0;
 	public String getStatisticInfo() {
 		
-		return "EnvItem发送量："+envItemSended
-				+"\nEnvItem接手量："+envItemReceived
-				+"\nEnvGroup发送量："+envGroupSended
-				+"\nEnvGroup接收量："+envGroupReceived
+		return "EnvItem发送量："+stat_item_sended
+				+"\nEnvItem接手量："+stat_item_received
+				+"\nEnvGroup发送量："+stat_template_sended
+				+"\nEnvGroup接收量："+stat_template_received
 				;
 	}
 
 	public List<String> getEnvItemPoolInfo() {
-		return envItemPool.toListString();
+		return item_pool.toListString();
 	}
 
-	public List<String> getEnvItemCacheInfo() {
-		return envItemCache.toListString();
+	public List<String> getEnvItemCachitnfo() {
+		return item_cache.toListString();
 	}
 
-	public List<String> getEnvGroupCacheInfo() {
-		return envGroupCache.toListString();
+	public List<String> getEnvGroupCachitnfo() {
+		return template_pool.toListString();
 	}
 
 	public List<String> getEnvGroupPoolInfo() {
-		return envGroupPool.toListString();
+		return template_cache.toListString();
 	}
 
 	public void clearData() {
 		clearCache();
-		envItemPool.clear();
-		envGroupPool.clear();
-		envItemReceived = 0;
-		envItemSended = 0;
-		envGroupSended = 0;
-		envGroupReceived = 0;
+		item_pool.clear();
+		template_cache.clear();
+		stat_item_received = 0;
+		stat_item_sended = 0;
+		stat_template_sended = 0;
+		stat_template_received = 0;
 	}
 
 	public void clearCache() {
-		envItemCache.clear();
-		envGroupCache.clear();
+		item_cache.clear();
+		template_pool.clear();
 	}
 }

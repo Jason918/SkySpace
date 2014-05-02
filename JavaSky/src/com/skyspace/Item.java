@@ -71,7 +71,7 @@ public class Item extends Element{
 			+"\n-[expire]:"+new Date(expire) + "\n";
 	}
 	/**
-	 * 将打包好的字符串生成EnvItem的对象
+	 * 将打包好的字符串生成Item的对象
 	 * JSON格式
 	 * @param pack
 	 */
