@@ -113,18 +113,18 @@ public class SkyEntry implements ISkyEntry {
 	}
 
 	@Override
-	public void Write(Item e) {
+	public void write(Item e) {
 		Sky.getInstance().write(e);
 	}
 
 	@Override
-	public void Write(ObjectProxy owner, String tuple, int type) {
-		Write(new Item(owner,type,tuple,lease_time));
+	public void write(ObjectProxy owner, String tuple, int type) {
+		write(new Item(owner,type,tuple,lease_time));
 	}
 
 	@Override
-	public void Write(ObjectProxy owner, String tuple, int type, int leasetime) {
-		Write(new Item(owner,type,tuple,leasetime));
+	public void write(ObjectProxy owner, String tuple, int type, int leasetime) {
+		write(new Item(owner,type,tuple,leasetime));
 	}
 
 

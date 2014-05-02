@@ -29,7 +29,7 @@ public interface ISkyEntry {
 	 * 将元组写入元组空间. 
 	 * @param ei 要写入元组空间的元组.
 	 */
-	public void Write(Item e);
+	public void write(Item e);
 	/**
 	 * 省去构造EnvItem
 	 * 各参数定义见{@link Item}
@@ -38,16 +38,16 @@ public interface ISkyEntry {
 	 * @param type 
 	 * @param leasetime
 	 */
-	public void Write(ObjectProxy owner,String tuple,int type,int leasetime );
+	public void write(ObjectProxy owner,String tuple,int type,int leasetime );
 	/**
 	 * leaseTime设置为默认值:见DEFAULT_TUPLE_LEASE_TIME
 	 * @param owner
 	 * @param tuple
 	 * @param type
 	 */
-	public void Write(ObjectProxy owner,String tuple,int type);
+	public void write(ObjectProxy owner,String tuple,int type);
 	
-	public void subscribe(Template eg);
+	public void subscribe(Template tmpl);
 	
 	/**
 	 * 订阅一个元组（从元组空间读取一个元组）
@@ -71,10 +71,10 @@ public interface ISkyEntry {
 	 */
 	public void subscribeMany(ObjectProxy owner, String template, int waitTime);
 	public void subscribeMany(ObjectProxy owner, String template);
-	public void subscribeMany(Template eg);
+	public void subscribeMany(Template tmpl);
 
 	
-	public void acquire(Template eg);
+	public void acquire(Template tmpl);
 	/**
 	 * 获取一个元组（从元组空间中拿走）
 	 * @param owner
@@ -90,7 +90,7 @@ public interface ISkyEntry {
 	public void acquire(ObjectProxy owner, String template);
 	public void acquireMany(ObjectProxy owner, String template, int waitTime);
 	public void acquireMany(ObjectProxy owner, String template);
-	public void acquireMany(Template eg);
+	public void acquireMany(Template tmpl);
 //	/**
 //	 * 增加拒绝访问策略
 //	 * @param acp
