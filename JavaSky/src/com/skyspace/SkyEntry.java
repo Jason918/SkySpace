@@ -1,65 +1,33 @@
 package com.skyspace;
 
+import java.util.List;
+
+import com.skyspace.util.CallBack;
 import com.skyspace.util.ObjectProxy;
 
 
 public class SkyEntry implements ISkyEntry {
+	public static int DEFAULT_TIME = 60000;
+	private int response_time = DEFAULT_TIME;
+	private int lease_time = DEFAULT_TIME;
+	private int wait_out = DEFAULT_TIME;
+	
 	public SkyEntry() {
 		Sky.getInstance().start(1000);
 	}
-	public static int DEFAULT_TIME = 60000;
-	
-	private int response_time = DEFAULT_TIME;
-	private int lease_time = DEFAULT_TIME;
-	private int wait_time = DEFAULT_TIME;
 
 	@Override
-	public void acquire(Template eg) {
-		if (eg.isAcquire() && !eg.isMany())
-			Sky.getInstance().sendRequest(eg);
+	public void acquire(Template tmpl, CallBack cb) {
+		if (tmpl.isAcquire() && !tmpl.isMany())
+			Sky.getInstance().sendRequest(tmpl);
 		else
-			Sky.logger.warning("eg is not acquire or is many!"+eg);
-	}
-
-	@Override
-	public void acquire(ObjectProxy owner, String template) {
-		acquire(new Template(owner, template, Template.TYPE_ACQUIRE, wait_time));
-	}
-
-	@Override
-	public void acquire(ObjectProxy owner, String template, int waitTime) {
-		acquire(new Template(owner, template, Template.TYPE_ACQUIRE, waitTime));
-	}
-
-	@Override
-	public void acquireMany(Template eg) {
-		if (eg.isAcquire() && eg.isMany())
-			Sky.getInstance().sendRequest(eg);
-		else
-			Sky.logger.warning("eg is not acquire or is not many!"+eg);
+			Sky.logger.warning("tmpl is not acquire or is many!"+tmpl);
 	}
 	
 	@Override
-	public void acquireMany(ObjectProxy owner, String template) {
-		acquire(new Template(owner, template, Template.TYPE_ACQUIRE|Template.TYPE_MANY, wait_time));		
+	public void setLeaseTime(int time) {
+		lease_time = time;
 	}
-
-	@Override
-	public void acquireMany(ObjectProxy owner, String template, int waitTime) {
-		acquire(new Template(owner, template, Template.TYPE_ACQUIRE|Template.TYPE_MANY, waitTime));		
-	}
-
-//	@Override
-//	public void addDenyAccessPolicy(AccessControlPolicy acp) {
-//		// TODO Auto-generated method stub
-//		
-//	}
-//
-//	@Override
-//	public void addTupleAllocationPolicy(TupleAllocationPolicy tap) {
-//		// TODO Auto-generated method stub
-//		
-//	}
 
 	@Override
 	public void setResponseTime(int time) {
@@ -67,64 +35,71 @@ public class SkyEntry implements ISkyEntry {
 	}
 
 	@Override
-	public void setWaitTime(int time) {
-		wait_time = time;
+	public void setTimeOut(int time) {
+		wait_out = time;
 	}
 
 	@Override
-	public void setLeaseTime(int time) {
-		lease_time = time;
-	}
-
-	@Override
-	public void subscribe(Template eg) {
-		if (!eg.isAcquire() && !eg.isMany())
-			Sky.getInstance().sendRequest(eg);
+	public void subscribe(Template tmpl, CallBack cb) {
+		if (!tmpl.isAcquire() && !tmpl.isMany())
+			Sky.getInstance().sendRequest(tmpl);
 		else
-			Sky.logger.warning("eg is not subscribe or is many!"+eg);
+			Sky.logger.warning("tmpl is not subscribe or is many!"+tmpl);
 	}
 	
-	@Override
-	public void subscribe(ObjectProxy owner, String template) {
-		subscribe(new Template(owner,template,Template.TYPE_SUBSCRIBE,wait_time));
-	}
-
-	@Override
-	public void subscribe(ObjectProxy owner, String template, int waitTime) {
-		subscribe(new Template(owner, template, Template.TYPE_SUBSCRIBE, waitTime));
-	}
-
-	@Override
-	public void subscribeMany(Template eg) {
-		if (!eg.isAcquire() && eg.isMany())
-			Sky.getInstance().sendRequest(eg);
-		else
-			Sky.logger.warning("eg is not subsribe or is not many!"+eg);
-	}
-
-	@Override
-	public void subscribeMany(ObjectProxy owner, String template) {
-		subscribeMany(new Template(owner, template, Template.TYPE_SUBSCRIBE|Template.TYPE_MANY, wait_time));		
-	}
-
-	@Override
-	public void subscribeMany(ObjectProxy owner, String template, int waitTime) {
-		subscribeMany(new Template(owner, template, Template.TYPE_SUBSCRIBE|Template.TYPE_MANY, waitTime));		
-	}
+	
+//	public void subscribe(ObjectProxy owner, String template) {
+//		subscribe(new Template(owner,template,Template.TYPE_SUBSCRIBE,wait_out));
+//	}
+//
+//	
+//	public void subscribe(ObjectProxy owner, String template, int waitTime) {
+//		subscribe(new Template(owner, template, Template.TYPE_SUBSCRIBE, waitTime));
+//	}
+//
+//	@Override
+//	public void subscribeMany(Template tmpl) {
+//		if (!tmpl.isAcquire() && tmpl.isMany())
+//			Sky.getInstance().sendRequest(tmpl);
+//		else
+//			Sky.logger.warning("tmpl is not subsribe or is not many!"+tmpl);
+//	}
+//
+//	@Override
+//	public void subscribeMany(ObjectProxy owner, String template) {
+//		subscribeMany(new Template(owner, template, Template.TYPE_SUBSCRIBE|Template.TYPE_MANY, wait_out));		
+//	}
+//
+//	@Override
+//	public void subscribeMany(ObjectProxy owner, String template, int waitTime) {
+//		subscribeMany(new Template(owner, template, Template.TYPE_SUBSCRIBE|Template.TYPE_MANY, waitTime));		
+//	}
 
 	@Override
 	public void write(Item e) {
 		Sky.getInstance().write(e);
 	}
 
-	@Override
+	
 	public void write(ObjectProxy owner, String tuple, int type) {
 		write(new Item(owner,type,tuple,lease_time));
 	}
 
-	@Override
+	
 	public void write(ObjectProxy owner, String tuple, int type, int leasetime) {
 		write(new Item(owner,type,tuple,leasetime));
+	}
+
+	@Override
+	public List<Item> read(Template tmpl) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Item> take(Template tmpl) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

@@ -2,6 +2,7 @@ package com.skyspace.test;
 
 import java.io.IOException;
 import java.lang.Character.Subset;
+import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
@@ -11,6 +12,7 @@ import com.skyspace.SkyEntry;
 import com.skyspace.Template;
 import com.skyspace.Item;
 import com.skyspace.Sky;
+import com.skyspace.util.CallBack;
 import com.skyspace.util.ObjectProxy;
 
 public class Test {
@@ -50,6 +52,20 @@ public class Test {
 //		ee.subscribeMany(eg1);
 		//ee.acquire(eg2);
 		Scanner scanner = new Scanner(System.in);
+		CallBack cb = new CallBack() {
+			
+			@Override
+			public void callbackMany(Template eg, ArrayList<Item> eiList) {
+				// TODO Auto-generated method stub
+				System.out.println("callbackMany");
+			}
+			
+			@Override
+			public void callback(Template eg, Item ei) {
+				// TODO Auto-generated method stub
+				System.out.println("callbackMany");
+			}
+		};
 		while (true) {
 			String cmd = scanner.nextLine();
 			if (cmd.equals("write")) {				
@@ -79,7 +95,7 @@ public class Test {
 						Template.TYPE_SUBSCRIBE|Template.TYPE_MANY,
 						6000
 						);
-				ee.subscribeMany(eg1);
+				ee.subscribe(eg1,cb);
 			} else if (cmd.equals("s2")) {
 				Template eg2 = new Template(
 						new ObjectProxy("YOU GET EG2"),
@@ -87,7 +103,7 @@ public class Test {
 						Template.TYPE_ACQUIRE,
 						60000
 						);
-				ee.acquire(eg2);
+				ee.acquire(eg2,cb);
 			}
 		}
 		System.out.println("TEST FINISHED");

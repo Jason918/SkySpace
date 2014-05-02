@@ -1,11 +1,17 @@
 package com.skyspace;
 
+import java.util.List;
+
+import com.skyspace.util.CallBack;
 import com.skyspace.util.ObjectProxy;
 
 
 /**
  * 元组空间接口
+ * TODO: 增加更加详细的说明
+ * 
  * 关于Write、Subscribe、Acquire这几个操作都是异步的。
+ * Read 和 Take操作是同步的。
  * 在ObjectAdapter中有Owner的地址,用Multicast公布结果.
  * 
  * @author Jason
@@ -21,84 +27,37 @@ public interface ISkyEntry {
 	 * @param time
 	 */
 	public void setResponseTime(int time);
-	
-	public void setWaitTime(int time);
-	
+	public void setTimeOut(int time);
 	public void setLeaseTime(int time);
 	/**
 	 * 将元组写入元组空间. 
-	 * @param ei 要写入元组空间的元组.
+	 * @param it 要写入元组空间的元组.
 	 */
-	public void write(Item e);
-	/**
-	 * 省去构造EnvItem
-	 * 各参数定义见{@link Item}
-	 * @param owner
-	 * @param tuple
-	 * @param type 
-	 * @param leasetime
-	 */
-	public void write(ObjectProxy owner,String tuple,int type,int leasetime );
-	/**
-	 * leaseTime设置为默认值:见DEFAULT_TUPLE_LEASE_TIME
-	 * @param owner
-	 * @param tuple
-	 * @param type
-	 */
-	public void write(ObjectProxy owner,String tuple,int type);
-	
-	public void subscribe(Template tmpl);
+	public void write(Item it);
 	
 	/**
-	 * 订阅一个元组（从元组空间读取一个元组）
-	 * @param owner	订阅的主人的描述信息
-	 * @param template	用来匹配元组空间的模版。
-	 * @param waitTime	有效时间 
+	 * 异步从元组空间读取元组
+	 * @param tmpl 订阅的模版
+	 * @param cb 读到之后的回调函数。
 	 */
-	public void subscribe(ObjectProxy owner, String template, int waitTime);
+	public void subscribe(Template tmpl, CallBack cb);
 	/**
-	 * waittime设置为默认值,见:DEFAULT_TEMPLATE_WAIT_TIME
-	 * @param owner
-	 * @param template
+	 * 同步从元组空间读取元组
+	 * @param tmpl
+	 * @return 读取到的元组集合
 	 */
-	public void subscribe(ObjectProxy owner, String template);
+	public List<Item> read(Template tmpl);
+	/**
+	 * 异步从元组空间拿走元组
+	 * @param tmpl 
+	 * @param cb 拿到之后的回调函数
+	 */
+	public void acquire(Template tmpl,CallBack cb);
+	/**
+	 * 同步从元组空间拿走元组
+	 * @param tmpl
+	 * @return 得到的元组集合
+	 */
+	public List<Item> take(Template tmpl);
 	
-	/**
-	 * subscribe的many版本
-	 * @param owner
-	 * @param template
-	 * @param waitTime
-	 */
-	public void subscribeMany(ObjectProxy owner, String template, int waitTime);
-	public void subscribeMany(ObjectProxy owner, String template);
-	public void subscribeMany(Template tmpl);
-
-	
-	public void acquire(Template tmpl);
-	/**
-	 * 获取一个元组（从元组空间中拿走）
-	 * @param owner
-	 * @param template
-	 * @param waitTime
-	 */
-	public void acquire(ObjectProxy owner, String template, int waitTime);
-	/**
-	 * waitTime使用DEFAULT_TEMPLATE_WAIT_TIME
-	 * @param owner
-	 * @param template
-	 */
-	public void acquire(ObjectProxy owner, String template);
-	public void acquireMany(ObjectProxy owner, String template, int waitTime);
-	public void acquireMany(ObjectProxy owner, String template);
-	public void acquireMany(Template tmpl);
-//	/**
-//	 * 增加拒绝访问策略
-//	 * @param acp
-//	 */
-//	public void addDenyAccessPolicy(AccessControlPolicy acp);
-//	/**
-//	 * 增加元组分配策略
-//	 * @param tap
-//	 */
-//	public void addTupleAllocationPolicy(TupleAllocationPolicy tap);
 }
