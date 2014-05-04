@@ -33,12 +33,12 @@ public class Template extends Element{
 	
 	public static CallBack default_callback = new CallBack() {
 		@Override
-		public void callbackMany(Template eg, ArrayList<Item> eiList) {
+		public void handleMany(Template eg, ArrayList<Item> eiList) {
 			System.out.println("+++++++++++\nDEFAULT_CALLBACK_MANY：\n"
 					+eg + "\n" + eiList + "\n+++++++++++++++++++++\n");
 		}
 		@Override
-		public void callback(Template eg, Item ei) {
+		public void handle(Template eg, Item ei) {
 			System.out.println("+++++++++++\nDEFAULT_CALLBACK：\n"
 					+eg + "\n" + ei + "\n+++++++++++++++++++++\n");
 		}
@@ -162,6 +162,13 @@ public class Template extends Element{
 	@Override
 	public Element unpack(String pack) {
 		return new Template(pack);
+	}
+	public CallBack getCallback() {
+		if (callback == null) {
+			return default_callback;
+		} else {
+			return callback;
+		}
 	}
 	
 	

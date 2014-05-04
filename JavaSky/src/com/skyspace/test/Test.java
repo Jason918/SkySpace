@@ -55,13 +55,13 @@ public class Test {
 		CallBack cb = new CallBack() {
 			
 			@Override
-			public void callbackMany(Template eg, ArrayList<Item> eiList) {
+			public void handleMany(Template eg, ArrayList<Item> eiList) {
 				// TODO Auto-generated method stub
 				System.out.println("callbackMany");
 			}
 			
 			@Override
-			public void callback(Template eg, Item ei) {
+			public void handle(Template eg, Item ei) {
 				// TODO Auto-generated method stub
 				System.out.println("callbackMany");
 			}

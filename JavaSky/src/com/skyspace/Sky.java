@@ -22,9 +22,9 @@ public class Sky {
 	public static Logger logger = Logger.getLogger(Sky.class.getName()); 
 	
 	private ItemPool item_pool;
-	private ItemPool item_cache;
-	private TemplatePool template_pool; // store other's request.
-	private TemplatePool template_cache;	//store own's envGroup
+//	private ItemPool item_cache;
+//	private TemplatePool template_cache; // store other's request.
+	private TemplatePool template_pool;	//store own's envGroup
 	private NetWorker networker;
 	private Timer garbage_collector;
 	
@@ -37,9 +37,9 @@ public class Sky {
 	private Sky() {
 		networker = new NetWorker();
 		item_pool = new ItemPool();
-		item_cache = new ItemPool();
+//		item_cache = new ItemPool();
+//		template_cache = new TemplatePool();
 		template_pool = new TemplatePool();
-		template_cache = new TemplatePool();
 		
 	}
 
@@ -50,7 +50,7 @@ public class Sky {
 	public void write(Item it) {
 		stat_item_sended ++;
 		//handle old groups.
-		if (!handleNewEnvItem(it, true)) {
+		if (!handleNewItem(it, true)) {
 			Sky.logger.fine("adding Item into pool:"+it);
 			item_pool.add(it);//did not acquired
 		}
@@ -62,7 +62,7 @@ public class Sky {
 	 */
 	public void sendRequest(Template tmpl) {
 		stat_template_sended ++;
-		template_cache.add(tmpl);
+//		template_cache.add(tmpl);
 		networker.sendDataToEnviroment(tmpl.pack());
 	}
 	
@@ -76,14 +76,14 @@ public class Sky {
 		Item it = item_pool.getMatch(tmpl);
 		if (it == null) {//not in pool ,trying cache.
 			Sky.logger.fine("no match in envItemPool");
-			it = item_cache.getMatch(tmpl);
-			if (it == null) { //not in the cache itther.put it in buffer.
-				Sky.logger.fine("no match in envItemCache");
-				template_pool.add(tmpl);
-			} else {//got a match in cache
-				Sky.logger.fine("get match in envItemCache:"+it);
-				networker.sendResult(it,tmpl,false);
-			}
+//			it = item_cache.getMatch(tmpl);
+//			if (it == null) { //not in the cache itther.put it in buffer.
+//				Sky.logger.fine("no match in envItemCache");
+//				template_pool.add(tmpl);
+//			} else {//got a match in cache
+//				Sky.logger.fine("get match in envItemCache:"+it);
+//				networker.sendResult(it,tmpl,false);
+//			}
 		} else {//got a match in pool
 			Sky.logger.fine("get match in envItemPool:"+it);
 			if (tmpl.isAcquire()) {
@@ -108,19 +108,20 @@ public class Sky {
 	public boolean handleResult(Item it,Template tmpl) {
 		stat_item_received ++;
 		Sky.logger.info("get Item "+ it + " for Template:"+tmpl);
-		Template ntmpl = template_cache.get(tmpl);
+		
+		Template ntmpl = template_pool.get(tmpl);
 		if (ntmpl != null) {
 			Sky.logger.info("####################\nEnvGroup get a match:\n"
 						+ ntmpl + "\n-----\n" + it+"\n#######################\n");
 			//System.out.println(ntmpl.owner.getAction());
 			if (ntmpl.isMany()) {
-				template_cache.addMatch(it,ntmpl);
+				template_pool.addMatch(it,ntmpl);
 			} else {
-				Template.default_callback.callback(ntmpl,it);
-				template_cache.remove(ntmpl);
+				ntmpl.getCallback().handle(ntmpl,it);
+				template_pool.remove(ntmpl);
 			}
-			item_cache.add(it);
-			handleNewEnvItem(it, false);
+//			item_cache.add(it);
+			handleNewItem(it, false);
 			return true;
 		}
 		Sky.logger.finer("do not have this Template any more");
@@ -132,31 +133,31 @@ public class Sky {
 	 * @param isFromOwner
 	 * @return 返回新加入的是否被成功acquire了
 	 */
-	private boolean handleNewEnvItem(Item it,boolean isFromOwner) {
-		Collection<Template> tmpls = template_pool.getMatch(it);
-		Template  ac = null;
-		for(Template tmpl:tmpls) {
-			if (!tmpl.isAcquire()) {
-				if (!networker.sendResult(it, tmpl, true) && !tmpl.isMany()) {
-					template_pool.add(tmpl);//target do not want this to end.
-				}
-			} else {
-				if (ac == null || tmpl.prior(ac)) {
-					ac = tmpl;
-				} else {
-					if (!tmpl.isMany()) {
-						template_pool.add(tmpl);
-					}
-				}
-			}
-		}
-		if (ac != null) {
-			if (networker.sendResult(it, ac, true)) {
-				return true;
-			} else if (!ac.isMany()) {
-				template_pool.add(ac);
-			}
-		}
+	private boolean handleNewItem(Item it,boolean isFromOwner) {
+//		Collection<Template> tmpls = template_cache.getMatch(it);
+//		Template  ac = null;
+//		for(Template tmpl:tmpls) {
+//			if (!tmpl.isAcquire()) {
+//				if (!networker.sendResult(it, tmpl, true) && !tmpl.isMany()) {
+//					template_cache.add(tmpl);//target do not want this to end.
+//				}
+//			} else {
+//				if (ac == null || tmpl.prior(ac)) {
+//					ac = tmpl;
+//				} else {
+//					if (!tmpl.isMany()) {
+//						template_cache.add(tmpl);
+//					}
+//				}
+//			}
+//		}
+//		if (ac != null) {
+//			if (networker.sendResult(it, ac, true)) {
+//				return true;
+//			} else if (!ac.isMany()) {
+//				template_cache.add(ac);
+//			}
+//		}
 		return false;
 	}
 
@@ -166,7 +167,7 @@ public class Sky {
 	 * @param tmpl
 	 */
 	public void handleCacheAcquireResult(Item it, Template tmpl) {
-		Template ntmpl = template_cache.get(tmpl);
+		Template ntmpl = template_pool.get(tmpl);
 		if (ntmpl != null) {		
 			Item new_it = networker.acquireEnvItem(it, ntmpl);
 			if (new_it != null) {
@@ -203,9 +204,9 @@ public class Sky {
 			public void run() {
 				try {
 					item_pool.buryDead();
-					item_cache.buryDead();
+//					item_cache.buryDead();
+//					template_cache.buryDead();
 					template_pool.buryDead();
-					template_cache.buryDead();
 				} catch (NullPointerException e) {
 					System.out.println("NULL pointer here");
 				}
@@ -229,41 +230,41 @@ public class Sky {
 	private int stat_template_received = 0;
 	public String getStatisticInfo() {
 		
-		return "EnvItem发送量："+stat_item_sended
-				+"\nEnvItem接手量："+stat_item_received
-				+"\nEnvGroup发送量："+stat_template_sended
-				+"\nEnvGroup接收量："+stat_template_received
+		return "Item发送量："+stat_item_sended
+				+"\nItem接手量："+stat_item_received
+				+"\nTemplate发送量："+stat_template_sended
+				+"\nTemplate接收量："+stat_template_received
 				;
 	}
 
-	public List<String> getEnvItemPoolInfo() {
+	public List<String> getItemPoolInfo() {
 		return item_pool.toListString();
 	}
 
-	public List<String> getEnvItemCachitnfo() {
-		return item_cache.toListString();
-	}
+//	public List<String> getEnvItemCachitnfo() {
+//		return item_cache.toListString();
+//	}
 
-	public List<String> getEnvGroupCachitnfo() {
+//	public List<String> getEnvGroupCachitnfo() {
+//		return template_pool.toListString();
+//	}
+
+	public List<String> getTemplatePoolInfo() {
 		return template_pool.toListString();
 	}
 
-	public List<String> getEnvGroupPoolInfo() {
-		return template_cache.toListString();
-	}
-
 	public void clearData() {
-		clearCache();
+//		clearCache();
 		item_pool.clear();
-		template_cache.clear();
+		template_pool.clear();
 		stat_item_received = 0;
 		stat_item_sended = 0;
 		stat_template_sended = 0;
 		stat_template_received = 0;
 	}
 
-	public void clearCache() {
-		item_cache.clear();
-		template_pool.clear();
-	}
+//	public void clearCache() {
+//		item_cache.clear();
+//		template_cache.clear();
+//	}
 }

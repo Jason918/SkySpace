@@ -6,6 +6,6 @@ import com.skyspace.Template;
 import com.skyspace.Item;
 
 public interface CallBack {
-	void callback(Template eg,Item ei);
-	void callbackMany(Template eg,ArrayList<Item> eiList);
+	void handle(Template eg,Item ei);
+	void handleMany(Template eg,ArrayList<Item> eiList);
 }
