@@ -25,17 +25,15 @@ public class Item extends Element{
 	 * 如果是可订阅,则加上TUPLE_TYPE_SUBSCRIBABLE,如果可获取则加上TUPLE_TYPE_ACQUIRABLE;
 	 * 组合的方式将各个变量的算数或值,如TUPLE_TYPE_SINGLETON|TUPLE_TYPE_SUBSCRIBABLE表示这个元组是单例的且可以被订阅不可以被获取.
 	 */
-	protected int type;
+	//protected int type;
 	/**
 	 * 元组内容
 	 */
-	protected String tuple;
+//	protected String tuple;
 	
 	
 	public Item(ObjectProxy owner,int type,String tuple,int time){
-		super(owner,time);
-		this.type = type;
-		this.tuple = tuple;
+		super(owner,time,tuple,type);
 	}
 	public boolean isSubscribale() {
 		return (type & TYPE_SUBSCRIBALE) != 0;
@@ -55,7 +53,7 @@ public class Item extends Element{
 		JSONObject jo = new JSONObject();
 		jo.put("owner", owner.toString());
 		jo.put("type", type);
-		jo.put("tuple", tuple);
+		jo.put("tuple", content);
 		jo.put("expire", expire);
 		return jo.toString();
 	}
@@ -67,7 +65,7 @@ public class Item extends Element{
 				+",isSubscribale:"+isSubscribale()
 				+",isAcquirable:"+isAcquirable()
 				+",isSinglton:"+isSinglton()
-			+"\n-[tuple]:"+tuple
+			+"\n-[tuple]:"+content
 			+"\n-[expire]:"+new Date(expire) + "\n";
 	}
 	/**
@@ -90,7 +88,7 @@ public class Item extends Element{
 		try {
 			owner = new ObjectProxy(jo.getString("owner"));
 			type = jo.getInt("type");
-			tuple = jo.getString("tuple"); //TODO change type of tuple
+			content = jo.getString("tuple"); //TODO change type of tuple
 			expire = jo.getLong("expire");
 		} catch (JSONException e) {
 			Sky.logger.warning("JSON member error:"+jo);

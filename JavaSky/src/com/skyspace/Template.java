@@ -28,9 +28,8 @@ public class Template extends Element{
 	public static final int TYPE_MANY		= 0x10;
 	public static final int TYPE_SUBSCRIBE	= 0x00;
 	
-	public int priority;
-	protected String template;	
-	protected int type;
+	protected int priority;
+	protected CallBack callback;
 	
 	public static CallBack default_callback = new CallBack() {
 		@Override
@@ -48,10 +47,8 @@ public class Template extends Element{
 	public Template(JSONObject jo) {
 		setMemberByJSON(jo);
 	}
-	public Template(ObjectProxy owner,String template,int type,int time) {
-		super(owner,time);
-		this.type = type;
-		this.template = template;
+	public Template(ObjectProxy owner, String template,int type,int time) {
+		super(owner, time, template, type);
 		this.priority = PRIORITY_NORMAL;
 	}
 
@@ -72,7 +69,7 @@ public class Template extends Element{
 	public boolean equals(Object obj) {
 		if (obj instanceof Template) {
 			Template eg = (Template)obj;
-			return type == eg.type && owner.equals(eg.owner) && template.equals(eg.template) && priority == eg.priority; 
+			return type == eg.type && owner.equals(eg.owner) && content.equals(eg.content) && priority == eg.priority; 
 		} else if (obj instanceof Item) {
 			Item ei = (Item) obj;
 			return match(ei);
@@ -111,8 +108,8 @@ public class Template extends Element{
 				return false;
 		}
 		Sky.logger.finer("permission pass,start real match");
-		String[] tuples = ei.tuple.split(",");
-		String[] templates = template.split(",");
+		String[] tuples = ei.content.split(",");
+		String[] templates = content.split(",");
 		if (tuples.length == templates.length){
 			for(int i = 0 ; i < tuples.length; i++) {
 				if (! templates[i].equals("?") && !templates[i].equals(tuples[i])){
@@ -131,7 +128,7 @@ public class Template extends Element{
 		JSONObject jo = new JSONObject();
 		jo.put("owner", owner.toString());
 		jo.put("type", type);
-		jo.put("template", template);
+		jo.put("template", content);
 		jo.put("expire", expire);
 		jo.put("priority", priority);
 		return jo.toString();
@@ -145,7 +142,7 @@ public class Template extends Element{
 		try {
 			owner = new ObjectProxy(jo.getString("owner"));
 			type = jo.getInt("type");
-			template = jo.getString("template");
+			content = jo.getString("template");
 			expire = jo.getLong("expire");
 			priority = jo.getInt("priority");
 		} catch (JSONException e) {
@@ -157,7 +154,7 @@ public class Template extends Element{
 	public String toString() {
 		return "Template:\n-[owner]:"+owner
 			+"\n-[type]:"+Integer.toHexString(type)
-			+"\n-[template]:"+template
+			+"\n-[template]:"+content
 			+"\n-[expire]:"+new Date(expire)
 			+"\n-[priority]:"+priority;
 	}
