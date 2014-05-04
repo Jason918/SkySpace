@@ -22,8 +22,8 @@ public class Sky {
 	public static Logger logger = Logger.getLogger(Sky.class.getName()); 
 	
 	private ItemPool envItemPool;
-	private ItemPool envItemCache;
-	private TemplatePool envGroupCache; // store other's request.
+//	private ItemPool envItemCache;
+//	private TemplatePool envGroupCache; // store other's request.
 	private TemplatePool envGroupPool;	//store own's envGroup
 //	private ArrayList<MatchItem> judgeList;//??? not used 
 	private NetWorker networker;
@@ -38,10 +38,9 @@ public class Sky {
 	private Sky() {
 		networker = new NetWorker();
 		envItemPool = new ItemPool();
-		envItemCache = new ItemPool();
-		envGroupCache = new TemplatePool();
+//		envItemCache = new ItemPool();
+//		envGroupCache = new TemplatePool();
 		envGroupPool = new TemplatePool();
-		
 	}
 
 	/**

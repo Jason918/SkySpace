@@ -8,18 +8,31 @@ public abstract class Element {
 	 */
 	protected ObjectProxy owner;
 	/**
-	 * 该元组所胜的生存时间
+	 * 该元组失效时间, 单位ms, 从1970年开始计数.
 	 */
 	protected long expire;
+	
+	/**
+	 * 该元素的内容
+	 */
+	protected String content;
+	
+	/**
+	 * 该元素的类型
+	 */
+	protected int type;
 	
 	/**
 	 * 容纳这个元素的集合
 	 */
 	ElementPool container;
 
-	public Element(ObjectProxy owner, int time) {
+	public Element(ObjectProxy owner, int time, String content, int type) {
 		this.owner = owner;
 		this.expire = System.currentTimeMillis() + time;
+		this.content = content;
+		this.type = type;
+		
 	}
 	public Element() {}
 
