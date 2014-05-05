@@ -120,8 +120,9 @@ public class NetWorker {
 			
 			@Override
 			public void run() {
+				ServerSocket ss;
 				try {
-					ServerSocket ss = new ServerSocket(SOCKET_PORT);
+					ss = new ServerSocket(SOCKET_PORT);
 					Socket socket;
 					while (!result_listener_stop) {
 						socket = ss.accept();
@@ -129,6 +130,7 @@ public class NetWorker {
 						PrintStream ps = new PrintStream(socket.getOutputStream(),true);
 						
 						String data = scanner.nextLine();
+						scanner.close();
 						Sky.logger.info("S-listener received:"+data);
 						
 						JSONObject obj ;
@@ -227,6 +229,7 @@ public class NetWorker {
 							Sky.logger.warning("Unknown message:" + obj.toString(4));
 						}
 					}
+					ss.close();
 				} catch (IOException e) {
 					System.out.println("get IO exception");
 					//e.printStackTrace();
@@ -276,6 +279,7 @@ public class NetWorker {
 				
 				ps.println(data);
 				Sky.logger.info("sending data done:->"+data);
+				socket.close();
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -388,6 +392,7 @@ public class NetWorker {
 				} else {
 					Sky.logger.warning("target did not roger that message:"+data);
 				}
+				scanner.close();
 				socket.close();
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
@@ -426,6 +431,7 @@ public class NetWorker {
 				ps.println(data);
 				
 				String rcv = scanner.nextLine();
+				scanner.close();
 				JSONObject jo = null;
 				try {
 					jo = new JSONObject(rcv);

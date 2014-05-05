@@ -23,8 +23,8 @@ public class Sky {
 	
 	private ItemPool item_pool;
 //	private ItemPool item_cache;
-//	private TemplatePool template_cache; // store other's request.
-	private TemplatePool template_pool;	//store own's envGroup
+	private TemplatePool template_cache; // store other's request.
+	private TemplatePool template_pool;	//store own's template
 	private NetWorker networker;
 	private Timer garbage_collector;
 	
@@ -38,7 +38,7 @@ public class Sky {
 		networker = new NetWorker();
 		item_pool = new ItemPool();
 //		item_cache = new ItemPool();
-//		template_cache = new TemplatePool();
+		template_cache = new TemplatePool();
 		template_pool = new TemplatePool();
 		
 	}
@@ -62,7 +62,7 @@ public class Sky {
 	 */
 	public void sendRequest(Template tmpl) {
 		stat_template_sended ++;
-//		template_cache.add(tmpl);
+		template_pool.add(tmpl);
 		networker.sendDataToEnviroment(tmpl.pack());
 	}
 	
@@ -134,30 +134,30 @@ public class Sky {
 	 * @return 返回新加入的是否被成功acquire了
 	 */
 	private boolean handleNewItem(Item it,boolean isFromOwner) {
-//		Collection<Template> tmpls = template_cache.getMatch(it);
-//		Template  ac = null;
-//		for(Template tmpl:tmpls) {
-//			if (!tmpl.isAcquire()) {
-//				if (!networker.sendResult(it, tmpl, true) && !tmpl.isMany()) {
-//					template_cache.add(tmpl);//target do not want this to end.
-//				}
-//			} else {
-//				if (ac == null || tmpl.prior(ac)) {
-//					ac = tmpl;
-//				} else {
-//					if (!tmpl.isMany()) {
-//						template_cache.add(tmpl);
-//					}
-//				}
-//			}
-//		}
-//		if (ac != null) {
-//			if (networker.sendResult(it, ac, true)) {
-//				return true;
-//			} else if (!ac.isMany()) {
-//				template_cache.add(ac);
-//			}
-//		}
+		Collection<Template> tmpls = template_cache.getMatch(it);
+		Template  ac = null;
+		for(Template tmpl:tmpls) {
+			if (!tmpl.isAcquire()) {
+				if (!networker.sendResult(it, tmpl, true) && !tmpl.isMany()) {
+					template_cache.add(tmpl);//target do not want this to end.
+				}
+			} else {
+				if (ac == null || tmpl.prior(ac)) {
+					ac = tmpl;
+				} else {
+					if (!tmpl.isMany()) {
+						template_cache.add(tmpl);
+					}
+				}
+			}
+		}
+		if (ac != null) {
+			if (networker.sendResult(it, ac, true)) {
+				return true;
+			} else if (!ac.isMany()) {
+				template_cache.add(ac);
+			}
+		}
 		return false;
 	}
 
@@ -205,7 +205,7 @@ public class Sky {
 				try {
 					item_pool.buryDead();
 //					item_cache.buryDead();
-//					template_cache.buryDead();
+					template_cache.buryDead();
 					template_pool.buryDead();
 				} catch (NullPointerException e) {
 					System.out.println("NULL pointer here");
@@ -257,6 +257,7 @@ public class Sky {
 //		clearCache();
 		item_pool.clear();
 		template_pool.clear();
+		template_cache.clear();
 		stat_item_received = 0;
 		stat_item_sended = 0;
 		stat_template_sended = 0;
