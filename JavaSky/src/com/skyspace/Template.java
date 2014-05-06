@@ -170,6 +170,9 @@ public class Template extends Element{
 			return callback;
 		}
 	}
+	public void setCallback(CallBack cb) {
+		callback = cb;
+	}
 	
 	
 }

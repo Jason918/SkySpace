@@ -85,7 +85,7 @@ public class Test {
 				if (isAcquirable) type = type | Item.TYPE_ACQUIRABLE;
 				if (isSubscribe) type = type | Item.TYPE_SUBSCRIBALE;
 				if (isSingleton) type = type | Item.TYPE_SINGLETON;
-				ee.write(new ObjectProxy(objectID), tuple, type,time);
+				ee.write(new Item(new ObjectProxy(objectID), type, tuple,time));
 			} else if (cmd.equals("exit")){
 				break;
 			} else if (cmd.equals("s1")){
