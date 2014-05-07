@@ -1,31 +1,29 @@
 package com.skyspace.util;
 
 import com.skyspace.NetWorker;
+import com.skyspace.Sky;
 
 public class ObjectProxy {
-	protected String NodeID; //node's ip address.format:ip:port
-	protected String ObjectID;//app's action/URI,format:edu.pku.sei.act.....
+	protected String ip; 
+	protected int port;
+	protected String name;
 	
 	
-	public ObjectProxy(String ownerInfo) {
-		String info_list[] = ownerInfo.split("#");
-		if (info_list.length == 1) {
-			NodeID = NetWorker.getLocalIP() + ":" +NetWorker.SOCKET_PORT;
-			ObjectID = info_list[0];
-		} else {
-			NodeID = info_list[0];
-			ObjectID = info_list[1];
-		}
+	public ObjectProxy(String name) {
+		this.name = name;
+		this.ip = NetWorker.getLocalIP();
+		this.port = NetWorker.getCommPort();
 	}
 
-	public ObjectProxy(String ip,int port,String action) {
-		NodeID = ip + ":" + port;
-		ObjectID = action;
+	public ObjectProxy(String ip,int port,String name) {
+		this.ip = ip;
+		this.port = port;
+		this.name = name;
 	}
 	
 	@Override
 	public String toString() {
-		return NodeID+"#"+ObjectID;
+		return name+"@"+ip+":"+port;
 	}
 	
 	/**
@@ -34,22 +32,34 @@ public class ObjectProxy {
 	 * @return
 	 */
 	public String getIP() {
-		int index = NodeID.indexOf(':');
-		return NodeID.substring(0,index);
+		return ip;
 	}
 	public int getPort() {
-		int index = NodeID.indexOf(':');
-		return Integer.parseInt(NodeID.substring(index+1));
+		return port;
 	}
 	@Override
 	public boolean equals(Object obj) {
 		if(obj instanceof ObjectProxy) {
 			ObjectProxy op = (ObjectProxy) obj;
-			return NodeID.equals(op.NodeID) && ObjectID.equals(op.ObjectID);
+			return port == op.port && ip.equals(op.ip) && name.equals(op.name);
 		}
 		return false;
 	}
-	public String getAction() {
-		return ObjectID;
+	
+	public static ObjectProxy buildByString(String str) {
+		String[] info1 = str.split("@");
+		if (info1.length == 2) {
+			String[] info2 = info1[1].split(":");
+			if (info2.length == 2) {
+				try {
+					int p = Integer.parseInt(info2[1]);
+					return new ObjectProxy(info2[0], p, info1[0]);
+				} catch(NumberFormatException e) {
+					
+				}
+			}
+		}
+		Sky.logger.warning("build ObjectProxy from String error:"+str);
+		return null;
 	}
 }

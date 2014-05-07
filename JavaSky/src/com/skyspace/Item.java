@@ -60,7 +60,7 @@ public class Item extends Element{
 	@Override
 	public String toString() {
 		
-		return "Item-\n[owner]:"+owner
+		return "Item\n-[owner]:"+owner
 			+"\n-[type]:"+Integer.toHexString(type)
 				+",isSubscribale:"+isSubscribale()
 				+",isAcquirable:"+isAcquirable()
@@ -86,7 +86,7 @@ public class Item extends Element{
 	}
 	private void setMemberByJSON(JSONObject jo) {
 		try {
-			owner = new ObjectProxy(jo.getString("owner"));
+			owner = ObjectProxy.buildByString(jo.getString("owner"));
 			type = jo.getInt("type");
 			content = jo.getString("tuple"); //TODO change type of tuple
 			expire = jo.getLong("expire");

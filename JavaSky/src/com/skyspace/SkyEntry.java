@@ -16,11 +16,11 @@ public class SkyEntry implements ISkyEntry {
 	private int time_out = DEFAULT_TIME;
 	
 	private ObjectProxy entry_owner;
-	public SkyEntry(ObjectProxy op) {
-		if (op == null) {
-			op = new ObjectProxy("DefaultProxy");
+	public SkyEntry(String owner_name) {
+		if (owner_name == null) {
+			entry_owner = new ObjectProxy("DefaultProxy");
 		} else {			
-			entry_owner = op;
+			entry_owner = new ObjectProxy(owner_name);
 		}
 		Sky.getInstance().start(1000);
 	}

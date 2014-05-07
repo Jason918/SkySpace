@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
@@ -11,21 +12,25 @@ import java.net.Socket;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.Scanner;
 
 import com.skyspace.json.JSONException;
 import com.skyspace.json.JSONObject;
 import com.skyspace.json.JSONStringer;
+import com.skyspace.util.ObjectProxy;
 
 public class NetWorker {
-	private static final String GROUP_IP = "224.0.0.251";
+	private static final String DEFAULT_GROUP_IP = "224.0.0.251";
 	private static InetAddress group =null;
-	private static final int GROUP_PORT = 63860;
-	public static final int SOCKET_PORT = 63861;
+	private static final int DEFAULT_GROUP_PORT = 63860;
+	private static final int DEFAULT_SOCKET_PORT = 63861;
 	private static final int BUFFER_SIZE = 1024;
+	private static int socket_port = getSocketPort();
 //	public static final int TIME_SPAN = 200;
 	
 //	private final String node_ip;
+	
 	MulticastSocket sender;
 	Thread request_listener;
 	boolean request_listener_stop;
@@ -41,7 +46,7 @@ public class NetWorker {
 			public void run() {
 				InetAddress group = null;
 				try {
-					group = InetAddress.getByName(GROUP_IP);
+					group = InetAddress.getByName(DEFAULT_GROUP_IP);
 				} catch (UnknownHostException e1) {
 					e1.printStackTrace();
 				}
@@ -51,7 +56,7 @@ public class NetWorker {
 				}
 		        MulticastSocket ms = null;  
 		        try {  
-		            ms = new MulticastSocket(GROUP_PORT);   
+		            ms = new MulticastSocket(DEFAULT_GROUP_PORT);   
 		            ms.joinGroup(group);
 		            
 		            byte[] buffer = new byte[BUFFER_SIZE];
@@ -98,18 +103,18 @@ public class NetWorker {
 	 * 使用TCP
 	 * 接受的数据情况：
 	 * 如果无法解析将返回的roger将为false，
-	 * 1.	获取本节点发出EG请求的响应，对方节点发送：
-	 * 		format: {op = "send result",Template tmpl,Item ei,boolean isFromOwner}.
+	 * 1.	获取本节点发出tmpl请求的响应，对方节点发送：
+	 * 		format: {op = "send result",Template tmpl,Item it,boolean isFromOwner}.
 	 * 		如果isFromOwner==false，则再向source节点直接发出获取节点的请求。
 	 * 		返回结果：{boolean roger,bool accept,String message}
-	 * 		如果接收这个EnvItem，则accept = true，无message。
-	 * 		如果拒绝这个EnvItem，则accept = false，message为具体原因。
+	 * 		如果接收这个Item，则accept = true，无message。
+	 * 		如果拒绝这个Item，则accept = false，message为具体原因。
 	 * 
 	 * 2.	接受到别的节点发来的acquire元组的请求:
-	 * 		format: {op = "acquire Item",Item ei,Template tmpl}
+	 * 		format: {op = "acquire Item",Item it,Template tmpl}
 	 * 		*此时要考虑 跟多播线程的数据同步问题。由TuplePool来保证线程安全。
-	 * 		返回：{boolean roger, boolean result,Item ei,String message}
-	 * 		如果result为true，表示允许对方acquire Item，对方需要返回是否接受该EnvItem。格式同上。
+	 * 		返回：{boolean roger, boolean result,Item it,String message}
+	 * 		如果result为true，表示允许对方acquire Item，对方需要返回是否接受该Item。格式同上。
 	 * 		如果result为false，则可以在message中说明原因。
 	 * 		
 	 * 		
@@ -122,7 +127,7 @@ public class NetWorker {
 			public void run() {
 				ServerSocket ss;
 				try {
-					ss = new ServerSocket(SOCKET_PORT);
+					ss = new ServerSocket(socket_port);
 					Socket socket;
 					while (!result_listener_stop) {
 						socket = ss.accept();
@@ -130,7 +135,7 @@ public class NetWorker {
 						PrintStream ps = new PrintStream(socket.getOutputStream(),true);
 						
 						String data = scanner.nextLine();
-						scanner.close();
+						
 						Sky.logger.info("S-listener received:"+data);
 						
 						JSONObject obj ;
@@ -140,14 +145,15 @@ public class NetWorker {
 							Sky.logger.warning("creat json fail:"+e);
 							ps.println("{\"roger\":false}");
 							socket.close();
+//							scanner.close();
 							continue;
 						}
 						if (obj.getString("op").equals("send result")) {//Operation 1.send result
 							if (obj.has("Item") && obj.has("Template") && obj.has("isFromOwner")) {
-								Item ei = new Item(obj.get("Item").toString());
-								Template eg = new Template(obj.get("Template").toString());
-								if (eg.isAcquire() && !obj.getBoolean("isFromOwner")) {
-									tupleSpace.handleCacheAcquireResult(ei,eg);
+								Item it = new Item(obj.get("Item").toString());
+								Template tmpl = new Template(obj.get("Template").toString());
+								if (tmpl.isAcquire() && !obj.getBoolean("isFromOwner")) {
+									tupleSpace.handleCacheAcquireResult(it,tmpl);
 									ps.println(new JSONStringer().object()
 											.key("roger").value(true)
 											.key("accept").value(true)
@@ -156,7 +162,7 @@ public class NetWorker {
 									socket.close();
 									continue;
 								} else {
-									boolean accept = tupleSpace.handleResult(ei,eg);
+									boolean accept = tupleSpace.handleResult(it,tmpl);
 									ps.println(new JSONStringer().object()
 											.key("roger").value(true)
 											.key("accept").value(accept)
@@ -175,14 +181,15 @@ public class NetWorker {
 										.endObject()
 										.toString());
 								socket.close();
+//								scanner.close();
 								continue;
 							}
 						} else if (obj.getString("op").equals("acquire Item")) {//Operation 2.acquire Item
 							if (obj.has("Item") && obj.has("Template")) {
-								Item ei = new Item(obj.get("Item").toString());
-								Template eg = new Template(obj.get("Template").toString());
-								Item new_ei= tupleSpace.acquireFromPool(ei,eg);
-								if (new_ei == null) {
+								Item it = new Item(obj.get("Item").toString());
+								Template tmpl = new Template(obj.get("Template").toString());
+								Item new_it= tupleSpace.acquireFromPool(it,tmpl);
+								if (new_it == null) {
 									ps.println(new JSONStringer().object()
 											.key("roger").value(true)
 											.key("result").value(false)
@@ -190,12 +197,13 @@ public class NetWorker {
 											.endObject()
 											.toString());
 									socket.close();
+//									scanner.close();
 									continue;
 								} else {
 									ps.println(new JSONStringer().object()
 											.key("roger").value(true)
 											.key("result").value(true)
-											.key("Item").value(new_ei.pack())
+											.key("Item").value(new_it.pack())
 											.endObject()
 											.toString());
 									String rcv = scanner.nextLine();
@@ -206,12 +214,13 @@ public class NetWorker {
 										Sky.logger.warning("can not parse received data into json:"+rcv);
 									}
 									if (jo.has("roger") && jo.getBoolean("roger")) {					
-										tupleSpace.confirmAcquire(new_ei,jo.getBoolean("accept"));
+										tupleSpace.confirmAcquire(new_it,jo.getBoolean("accept"));
 									} else {
-										tupleSpace.confirmAcquire(new_ei,false);
+										tupleSpace.confirmAcquire(new_it,false);
 										Sky.logger.warning("target did not roger that message:"+data);
 									}
 									socket.close();
+//									scanner.close();
 									continue;
 								}
 							} else {//error handle...
@@ -223,6 +232,7 @@ public class NetWorker {
 										.endObject()
 										.toString());
 								socket.close();
+//								scanner.close();
 								continue;
 							}
 						} else {
@@ -231,8 +241,8 @@ public class NetWorker {
 					}
 					ss.close();
 				} catch (IOException e) {
-					System.out.println("get IO exception");
-					//e.printStackTrace();
+//					System.out.println("get IO exception");
+					e.printStackTrace();
 				}
 			}
 		});
@@ -241,7 +251,7 @@ public class NetWorker {
 	}
 	public void stopResponseListener() {
 		result_listener_stop = true;
-		sendDataToNode("STOP YOURSELF!",getLocalIP(),SOCKET_PORT);
+		sendDataToNode("STOP YOURSELF!",getLocalIP(),socket_port);
 	}
 	/**
 	 * send request into tuple space
@@ -254,7 +264,7 @@ public class NetWorker {
 			@Override
 			public void run() {
 				byte[] buff = data.getBytes();
-				final DatagramPacket dp = new DatagramPacket(buff, buff.length,group,GROUP_PORT);
+				final DatagramPacket dp = new DatagramPacket(buff, buff.length,group,DEFAULT_GROUP_PORT);
 				try {
 					sender.send(dp);
 				} catch (Exception e) {
@@ -280,6 +290,7 @@ public class NetWorker {
 				ps.println(data);
 				Sky.logger.info("sending data done:->"+data);
 				socket.close();
+				
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -293,13 +304,14 @@ public class NetWorker {
 	}
 	/**
 	 * 做初始化工作.
+	 * @param op 
 	 */
 	public NetWorker() {
 		/**
 		 * init sender...
 		 */
 		try {
-			group = InetAddress.getByName(GROUP_IP);
+			group = InetAddress.getByName(DEFAULT_GROUP_IP);
 		} catch (UnknownHostException e1) {
 			e1.printStackTrace();
 		}
@@ -309,12 +321,52 @@ public class NetWorker {
 		}
 		sender = null;
 		try {
-			sender = new MulticastSocket(GROUP_PORT);
+			sender = new MulticastSocket(DEFAULT_GROUP_PORT);
 			sender.setTimeToLive(100);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+	
+	/**
+	 * get a free socket_port.
+	 */
+	private static int getSocketPort() {
+		if (! isPortAvilable(DEFAULT_SOCKET_PORT)) {
+			int max_cnt = 10;
+			Random rand = new Random();
+			while (max_cnt --> 0) {
+				
+				int new_port = rand.nextInt(65536-1024)+1024;
+				if (isPortAvilable(new_port)) {					
+					Sky.logger.fine("get new free socket port:"+new_port);
+					return new_port;
+				}
+			}
+			Sky.logger.warning("get new free socket port failed");
+			return 0;
+		} else {
+			Sky.logger.fine("use default socket port:"+DEFAULT_SOCKET_PORT);
+			return DEFAULT_SOCKET_PORT;
+		}
+		
+	}
+	private static void bindPort(String host, int port) throws Exception {
+	    Socket s = new Socket();
+	    s.bind(new InetSocketAddress(host, port));
+	    s.close();
+	}
+	private static boolean isPortAvilable(int port) {
+//		System.out.println("testing port "+port);
+	    try {
+	        bindPort("0.0.0.0", port);
+	        bindPort(getLocalIP(), port);
+	        return true;
+	    } catch (Exception e) {
+	        return false;
+	    }
+	}
+	
 	public static String ipv4 = null;
 	public static String getLocalIP() {
 		if (ipv4 == null) {
@@ -349,23 +401,23 @@ public class NetWorker {
 	}
 	
 	/**
-	 * 往eg发送ei，
-	 * @param ei
+	 * 往tmpl发送it，
+	 * @param it
 	 * @param tmpl
 	 * @param isFromOwner
 	 * @return
 	 */
-	public boolean sendResult(Item ei, Template eg,boolean isFromOwner) {
+	public boolean sendResult(Item it, Template tmpl,boolean isFromOwner) {
 		String data = new JSONStringer()
 		.object()
 			.key("op").value("send result")
-			.key("Item").value(ei.pack())
-			.key("Template").value(eg.pack())
+			.key("Item").value(it.pack())
+			.key("Template").value(tmpl.pack())
 			.key("isFromOwner").value(isFromOwner)
 		.endObject()
 		.toString();
-		String address = eg.owner.getIP();
-		int port = eg.owner.getPort();
+		String address = tmpl.owner.getIP();
+		int port = tmpl.owner.getPort();
 		boolean rtn = false ;
 		if (address.matches("\\d+\\.\\d+\\.\\d+\\.\\d+")) {
 			try {
@@ -392,7 +444,7 @@ public class NetWorker {
 				} else {
 					Sky.logger.warning("target did not roger that message:"+data);
 				}
-				scanner.close();
+//				scanner.close();
 				socket.close();
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
@@ -406,17 +458,17 @@ public class NetWorker {
 	}
 	/**
 	 * 接受到别的节点发来的acquire元组的请求:
-	 * 		format: {op = "acquire Item",Item ei,Template tmpl}
+	 * 		format: {op = "acquire Item",Item it,Template tmpl}
 	 * 		*此时要考虑 跟多播线程的数据同步问题。由TuplePool来保证线程安全。
-	 * 		返回：{boolean roger, boolean result,Item ei,String message}
-	 * 		如果result为true，表示允许对方acquire Item，对方需要返回是否接受该EnvItem。格式同上。
+	 * 		返回：{boolean roger, boolean result,Item it,String message}
+	 * 		如果result为true，表示允许对方acquire Item，对方需要返回是否接受该Item。格式同上。
 	 * 		如果result为false，则可以在message中说明原因。
-	 * @param ei
+	 * @param it
 	 * @param tmpl
 	 */
-	public Item acquireEnvItem(Item ei, Template eg){
-		String address = eg.owner.getIP();
-		int port = eg.owner.getPort();
+	public Item acquireItem(Item it, Template tmpl){
+		String address = tmpl.owner.getIP();
+		int port = tmpl.owner.getPort();
 		if (address.matches("\\d+\\.\\d+\\.\\d+\\.\\d+")) {
 			try {
 				Socket socket = new Socket(address,port);
@@ -424,14 +476,14 @@ public class NetWorker {
 				PrintStream ps = new PrintStream(socket.getOutputStream());
 				String data = new JSONStringer().object()
 					.key("op").value("acquire Item")
-					.key("Item").value(ei.pack())
-					.key("Template").value(eg.pack())
+					.key("Item").value(it.pack())
+					.key("Template").value(tmpl.pack())
 					.endObject().toString();
 					
 				ps.println(data);
 				
 				String rcv = scanner.nextLine();
-				scanner.close();
+				
 				JSONObject jo = null;
 				try {
 					jo = new JSONObject(rcv);
@@ -440,10 +492,11 @@ public class NetWorker {
 				}
 				if (jo.has("roger") && jo.getBoolean("roger")) {					
 					if (jo.getBoolean("result")) {
-						Item new_ei = new Item(jo.getString("Item"));
-						Sky.logger.info("result:"+new_ei);
+						Item new_it = new Item(jo.getString("Item"));
+						Sky.logger.info("result:"+new_it);
 						socket.close();
-						return new_ei;
+//						scanner.close();
+						return new_it;
 					} else {
 						Sky.logger.info("result false");
 					}
@@ -451,6 +504,7 @@ public class NetWorker {
 					Sky.logger.warning("target did not roger that message:"+data);
 				}
 				socket.close();
+//				scanner.close();
 			} catch (UnknownHostException e) {
 				e.printStackTrace();
 			} catch (IOException e) {
@@ -460,5 +514,9 @@ public class NetWorker {
 			Sky.logger.warning("IP format not right");
 		}
 		return null;
+	}
+
+	public static int getCommPort() {
+		return socket_port;
 	}
 }

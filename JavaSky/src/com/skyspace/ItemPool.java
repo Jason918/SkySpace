@@ -8,34 +8,34 @@ public class ItemPool extends ElementPool{
 	private CopyOnWriteArrayList<Item> envItemList = new CopyOnWriteArrayList<Item>();
 	private CopyOnWriteArrayList<Item> lockList = new CopyOnWriteArrayList<Item>();
 		
-	public Item getMatch(Template eg) {
-		int index = envItemList.indexOf(eg);
+	public Item getMatch(Template tmpl) {
+		int index = envItemList.indexOf(tmpl);
 		if (index >= 0)
 			return envItemList.get(index);
 		else 
 			return null;
 	}
-	public void lock(Item ei) {
-		int index = envItemList.indexOf(ei);
+	public void lock(Item it) {
+		int index = envItemList.indexOf(it);
 		if (index >= 0) {
 			lockList.add(envItemList.get(index));
 			envItemList.remove(index);
 		} else {
-			Sky.logger.warning("lock fail,item do not exits:"+ei);
+			Sky.logger.warning("lock fail,item do not exits:"+it);
 		}
 		
 	}
-	public void unlock(Item ei) {
-		int index = lockList.indexOf(ei);
+	public void unlock(Item it) {
+		int index = lockList.indexOf(it);
 		if (index >= 0) {
 			envItemList.add(lockList.get(index));
 			lockList.remove(index);
 		} else {
-			Sky.logger.warning("unlock fail,item do not exits:"+ei);
+			Sky.logger.warning("unlock fail,item do not exits:"+it);
 		}
 	}
-	public Item get(Item ei) {
-		int index = envItemList.indexOf(ei);
+	public Item get(Item it) {
+		int index = envItemList.indexOf(it);
 		if (index >= 0)
 			return envItemList.get(index);
 		else 
@@ -47,16 +47,16 @@ public class ItemPool extends ElementPool{
 			Sky.logger.warning("element is not Item");
 			return ;
 		}
-		Item ei = (Item) e;
-		if (ei.isSinglton()) {
-			int index = envItemList.indexOf(ei);
+		Item it = (Item) e;
+		if (it.isSinglton()) {
+			int index = envItemList.indexOf(it);
 			if (index >= 0) {
-				envItemList.get(index).expire = ei.expire;//update expiredate!!
+				envItemList.get(index).expire = it.expire;//update expiredate!!
 				return;
 			}
 		}
-		envItemList.add(ei);
-		ei.setContainer(this);
+		envItemList.add(it);
+		it.setContainer(this);
 	}
 	@Override
 	public void remove(Element e) {
@@ -76,11 +76,11 @@ public class ItemPool extends ElementPool{
 	}
 	@Override
 	public void buryDead() {
-		for(Item ei: envItemList) {
-			ei.isAlive();
+		for(Item it: envItemList) {
+			it.isAlive();
 		}
-		for(Item ei: lockList) {
-			ei.isAlive();
+		for(Item it: lockList) {
+			it.isAlive();
 		}
 	}
 	public void clear() {
@@ -89,8 +89,8 @@ public class ItemPool extends ElementPool{
 	}
 	public List<String> toListString() {
 		ArrayList<String> list = new ArrayList<String>();
-		for(Item ei : envItemList) {
-			list.add(ei.toString());
+		for(Item it : envItemList) {
+			list.add(it.toString());
 		}
 		return list;
 	}

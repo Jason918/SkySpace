@@ -6,6 +6,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.logging.Logger;
 
+import com.skyspace.util.ObjectProxy;
+
 public class Sky {
 	/**
 	 * singleton...
@@ -40,7 +42,7 @@ public class Sky {
 //		item_cache = new ItemPool();
 		template_cache = new TemplatePool();
 		template_pool = new TemplatePool();
-		
+		logger.finer("construct done.");
 	}
 
 	/**
@@ -72,10 +74,10 @@ public class Sky {
 	 */
 	public void handleRequest(Template tmpl) {
 		stat_template_received++;
-		Sky.logger.entering("ENV", "handle_request", tmpl);
+		Sky.logger.entering("Sky", "handling request:", tmpl);
 		Item it = item_pool.getMatch(tmpl);
 		if (it == null) {//not in pool ,trying cache.
-			Sky.logger.fine("no match in envItemPool");
+			Sky.logger.fine("ingoring cache~");
 //			it = item_cache.getMatch(tmpl);
 //			if (it == null) { //not in the cache itther.put it in buffer.
 //				Sky.logger.fine("no match in envItemCache");
@@ -85,7 +87,7 @@ public class Sky {
 //				networker.sendResult(it,tmpl,false);
 //			}
 		} else {//got a match in pool
-			Sky.logger.fine("get match in envItemPool:"+it);
+			Sky.logger.fine("get match in item_pool:"+it);
 			if (tmpl.isAcquire()) {
 				item_pool.lock(it);
 				if (networker.sendResult(it,tmpl,true)) {
@@ -111,7 +113,7 @@ public class Sky {
 		
 		Template ntmpl = template_pool.get(tmpl);
 		if (ntmpl != null) {
-			Sky.logger.info("####################\nEnvGroup get a match:\n"
+			Sky.logger.info("####################\nTemplate get a match:\n"
 						+ ntmpl + "\n-----\n" + it+"\n#######################\n");
 			//System.out.println(ntmpl.owner.getAction());
 			if (ntmpl.isMany()) {
@@ -169,7 +171,7 @@ public class Sky {
 	public void handleCacheAcquireResult(Item it, Template tmpl) {
 		Template ntmpl = template_pool.get(tmpl);
 		if (ntmpl != null) {		
-			Item new_it = networker.acquireEnvItem(it, ntmpl);
+			Item new_it = networker.acquireItem(it, ntmpl);
 			if (new_it != null) {
 				handleResult(new_it,tmpl);
 			}
@@ -212,6 +214,8 @@ public class Sky {
 				}
 			}
 		}, 1000, period);
+		logger.finer("start sky done.");
+
 	}
 
 	/**

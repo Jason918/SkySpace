@@ -140,7 +140,7 @@ public class Template extends Element{
 	
 	private void setMemberByJSON(JSONObject jo) {
 		try {
-			owner = new ObjectProxy(jo.getString("owner"));
+			owner = ObjectProxy.buildByString(jo.getString("owner"));
 			type = jo.getInt("type");
 			content = jo.getString("template");
 			expire = jo.getLong("expire");
