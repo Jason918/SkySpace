@@ -33,14 +33,14 @@ public class Template extends Element{
 	
 	public static CallBack default_callback = new CallBack() {
 		@Override
-		public void handleMany(Template eg, ArrayList<Item> eiList) {
+		public void handleMany(Template tmpl, ArrayList<Item> itList) {
 			System.out.println("+++++++++++\nDEFAULT_CALLBACK_MANY：\n"
-					+eg + "\n" + eiList + "\n+++++++++++++++++++++\n");
+					+tmpl + "\n" + itList + "\n+++++++++++++++++++++\n");
 		}
 		@Override
-		public void handle(Template eg, Item ei) {
+		public void handle(Template tmpl, Item it) {
 			System.out.println("+++++++++++\nDEFAULT_CALLBACK：\n"
-					+eg + "\n" + ei + "\n+++++++++++++++++++++\n");
+					+tmpl + "\n" + it + "\n+++++++++++++++++++++\n");
 		}
 	};
 	
@@ -62,20 +62,20 @@ public class Template extends Element{
 			JSONObject jo = new JSONObject(pack);
 			setMemberByJSON(jo);
 		} catch (JSONException e) {
-			Sky.logger.warning("String pack format illegal:"+pack);
+			Sky.logger.warning("String pack format illtmplal:"+pack);
 		}
 	}
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof Template) {
-			Template eg = (Template)obj;
-			return type == eg.type && owner.equals(eg.owner) && content.equals(eg.content) && priority == eg.priority; 
+			Template tmpl = (Template)obj;
+			return type == tmpl.type && owner.equals(tmpl.owner) && content.equals(tmpl.content) && priority == tmpl.priority; 
 		} else if (obj instanceof Item) {
-			Item ei = (Item) obj;
-			return match(ei);
+			Item it = (Item) obj;
+			return match(it);
 		} else if (obj instanceof MatchItem){
 			MatchItem mi = (MatchItem) obj;
-			return equals(mi.eg);
+			return equals(mi.tmpl);
 		} else 
 			return false;
 	}
@@ -89,26 +89,26 @@ public class Template extends Element{
 	}
 	/**
 	 * 判断一个EnvItem是否能匹配EnvGroup
-	 * @param ei 匹配的目标对象
-	 * @return 这个EnvGroup是否能匹配ei
+	 * @param it 匹配的目标对象
+	 * @return 这个EnvGroup是否能匹配it
 	 */
-	public boolean match(Item ei) {
-		Sky.logger.entering("Template", "match", ei);
+	public boolean match(Item it) {
+		Sky.logger.entering("Template", "match", it);
 		//check alive:
-		if (!isAlive() || !ei.isAlive()) {
+		if (!isAlive() || !it.isAlive()) {
 			
 			return false;
 		}
 		//permision check
 		if (isAcquire()){
-			if (!ei.isAcquirable())
+			if (!it.isAcquirable())
 				return false;
 		} else {
-			if (!ei.isSubscribale())
+			if (!it.isSubscribale())
 				return false;
 		}
 		Sky.logger.finer("permission pass,start real match");
-		String[] tuples = ei.content.split(",");
+		String[] tuples = it.content.split(",");
 		String[] templates = content.split(",");
 		if (tuples.length == templates.length){
 			for(int i = 0 ; i < tuples.length; i++) {

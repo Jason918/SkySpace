@@ -6,51 +6,51 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TemplatePool extends ElementPool{
-	private CopyOnWriteArrayList<Template> envGroupList = new CopyOnWriteArrayList<Template>();
+	private CopyOnWriteArrayList<Template> tmplList = new CopyOnWriteArrayList<Template>();
 	private CopyOnWriteArrayList<MatchItem> matchList;
 	/**
 	 * 获取能够的匹配ei的EnvGroup，将返回的数据从envGroupList中删除（保留具有many属性的）
-	 * @param ei
+	 * @param it
 	 * @return 匹配的集合。如果没有结果就返回空的集合（非null）
 	 */
-	public Collection<Template> getMatch(Item ei) {
-		CopyOnWriteArrayList<Template> egs = new CopyOnWriteArrayList<Template>();
-		for(Template eg:envGroupList) {
-			if (eg.match(ei)) {
-				if (!eg.isMany())
-					envGroupList.remove(eg);
-				egs.add(eg);
+	public Collection<Template> getMatch(Item it) {
+		CopyOnWriteArrayList<Template> tmpls = new CopyOnWriteArrayList<Template>();
+		for(Template tmpl:tmplList) {
+			if (tmpl.match(it)) {
+				if (!tmpl.isMany())
+					tmplList.remove(tmpl);
+				tmpls.add(tmpl);
 			}
 		}
-		return egs;
+		return tmpls;
 	}
 	
 	/**
-	 * Class for storing a list of EnvItems which can match eg.
+	 * Class for storing a list of EnvItems which can match tmpl.
 	 * ei can decide to match which one.
 	 * @author jason
 	 *
 	 */
 	class MatchItem {
-		Template eg;
-		ArrayList<Item> eis;
+		Template tmpl;
+		ArrayList<Item> itList;
 		@Override
 		public String toString() {
-			return "MatchItem;" + eg + "result:" + eis;
+			return "MatchItem;" + tmpl + "result:" + itList;
 		}
 		@Override
 		public boolean equals(Object obj) {
 			if (obj instanceof MatchItem) {
-				return eg.equals(((MatchItem)obj).eg);
+				return tmpl.equals(((MatchItem)obj).tmpl);
 			} else 
 				return false;
 		}
-		MatchItem(Template eg2) {
-			eg = eg2;
+		MatchItem(Template tmpl2) {
+			tmpl = tmpl2;
 		}
 		void add(Item ei) {
-			if (eis == null) eis = new ArrayList<Item>();
-			eis.add(ei);
+			if (itList == null) itList = new ArrayList<Item>();
+			itList.add(ei);
 		}
 	}
 	@Override
@@ -59,24 +59,24 @@ public class TemplatePool extends ElementPool{
 			Sky.logger.warning("element is not Item");
 			return ;
 		}
-		envGroupList.add((Template)e);
+		tmplList.add((Template)e);
 		e.setContainer(this);
 	}
 	
 	/**
-	 * put an ei into a type-many eg;
-	 * @param ei
-	 * @param eg
+	 * put an ei into a type-many tmpl;
+	 * @param it
+	 * @param tmpl
 	 */
-	public void addMatch(Item ei,Template eg) {
+	public void addMatch(Item it,Template tmpl) {
 		if (matchList == null)
 			matchList = new CopyOnWriteArrayList<TemplatePool.MatchItem>();
-		MatchItem mi = new MatchItem(eg);
+		MatchItem mi = new MatchItem(tmpl);
 		int index = matchList.indexOf(mi);
 		if (index >= 0) {
-			matchList.get(index).add(ei);
+			matchList.get(index).add(it);
 		} else {
-			mi.add(ei);
+			mi.add(it);
 			matchList.add(mi);
 		}
 		
@@ -87,43 +87,43 @@ public class TemplatePool extends ElementPool{
 			Sky.logger.warning("element is not Item");
 			return ;
 		}
-		Template eg = (Template) e;
-		envGroupList.remove(eg);
-		if (eg.isMany() && matchList != null) {
-			int index = matchList.indexOf(eg);
+		Template tmpl = (Template) e;
+		tmplList.remove(tmpl);
+		if (tmpl.isMany() && matchList != null) {
+			int index = matchList.indexOf(tmpl);
 			if (index >= 0) {
 				MatchItem mi = matchList.get(index);
-				Template.default_callback.handleMany(mi.eg, mi.eis);
+				Template.default_callback.handleMany(mi.tmpl, mi.itList);
 				matchList.remove(index);
 			}
 		}
 		
 	}
 
-	public Template get(Template eg) {
-		int index = envGroupList.indexOf(eg);
+	public Template get(Template tmpl) {
+		int index = tmplList.indexOf(tmpl);
 		if (index >= 0)
-			return envGroupList.get(index);
+			return tmplList.get(index);
 		else
 			return null;
 	}
 
 	@Override
 	public void buryDead() {
-		for(Template eg:envGroupList) {
-			eg.isAlive();
+		for(Template tmpl:tmplList) {
+			tmpl.isAlive();
 		}
 	}
 
 	public void clear() {
-		envGroupList.clear();
+		tmplList.clear();
 		if (matchList != null) matchList.clear();
 	}
 
 	public List<String> toListString() {
 		ArrayList<String> list = new ArrayList<String>();
-		for(Template eg : envGroupList) {
-			list.add(eg.toString());
+		for(Template tmpl : tmplList) {
+			list.add(tmpl.toString());
 		}
 		return list;
 	}

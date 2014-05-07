@@ -51,4 +51,11 @@ public abstract class Element {
 	}
 	public abstract String pack();
 	public abstract Element unpack(String pack);
+	public ObjectProxy getOwner() {
+		return owner;
+	}
+	public void setOwner(ObjectProxy owner) {
+		this.owner = owner; 
+	}
+	
 }

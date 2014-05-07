@@ -99,14 +99,14 @@ public class NetWorker {
 	 * 接受的数据情况：
 	 * 如果无法解析将返回的roger将为false，
 	 * 1.	获取本节点发出EG请求的响应，对方节点发送：
-	 * 		format: {op = "send result",Template eg,Item ei,boolean isFromOwner}.
+	 * 		format: {op = "send result",Template tmpl,Item ei,boolean isFromOwner}.
 	 * 		如果isFromOwner==false，则再向source节点直接发出获取节点的请求。
 	 * 		返回结果：{boolean roger,bool accept,String message}
 	 * 		如果接收这个EnvItem，则accept = true，无message。
 	 * 		如果拒绝这个EnvItem，则accept = false，message为具体原因。
 	 * 
 	 * 2.	接受到别的节点发来的acquire元组的请求:
-	 * 		format: {op = "acquire Item",Item ei,Template eg}
+	 * 		format: {op = "acquire Item",Item ei,Template tmpl}
 	 * 		*此时要考虑 跟多播线程的数据同步问题。由TuplePool来保证线程安全。
 	 * 		返回：{boolean roger, boolean result,Item ei,String message}
 	 * 		如果result为true，表示允许对方acquire Item，对方需要返回是否接受该EnvItem。格式同上。
@@ -351,7 +351,7 @@ public class NetWorker {
 	/**
 	 * 往eg发送ei，
 	 * @param ei
-	 * @param eg
+	 * @param tmpl
 	 * @param isFromOwner
 	 * @return
 	 */
@@ -406,13 +406,13 @@ public class NetWorker {
 	}
 	/**
 	 * 接受到别的节点发来的acquire元组的请求:
-	 * 		format: {op = "acquire Item",Item ei,Template eg}
+	 * 		format: {op = "acquire Item",Item ei,Template tmpl}
 	 * 		*此时要考虑 跟多播线程的数据同步问题。由TuplePool来保证线程安全。
 	 * 		返回：{boolean roger, boolean result,Item ei,String message}
 	 * 		如果result为true，表示允许对方acquire Item，对方需要返回是否接受该EnvItem。格式同上。
 	 * 		如果result为false，则可以在message中说明原因。
 	 * @param ei
-	 * @param eg
+	 * @param tmpl
 	 */
 	public Item acquireEnvItem(Item ei, Template eg){
 		String address = eg.owner.getIP();

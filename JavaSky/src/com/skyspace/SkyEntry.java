@@ -15,12 +15,19 @@ public class SkyEntry implements ISkyEntry {
 	private int lease_time = DEFAULT_TIME;
 	private int time_out = DEFAULT_TIME;
 	
-	public SkyEntry() {
+	private ObjectProxy entry_owner;
+	public SkyEntry(ObjectProxy op) {
+		if (op == null) {
+			op = new ObjectProxy("DefaultProxy");
+		} else {			
+			entry_owner = op;
+		}
 		Sky.getInstance().start(1000);
 	}
 
 	@Override
 	public void acquire(Template tmpl, CallBack cb) {
+		check_element_owner(tmpl);
 		tmpl.setCallback(cb);
 		if (tmpl.isAcquire())
 			Sky.getInstance().sendRequest(tmpl);
@@ -28,6 +35,12 @@ public class SkyEntry implements ISkyEntry {
 			Sky.logger.warning("tmpl is not acquire or take!"+tmpl);
 	}
 	
+	private void check_element_owner(Element ele) {
+		if (ele.getOwner() == null) {
+			ele.setOwner(entry_owner);
+		}
+	}
+
 	@Override
 	public void setLeaseTime(int time) {
 		lease_time = time;
@@ -45,6 +58,7 @@ public class SkyEntry implements ISkyEntry {
 
 	@Override
 	public void subscribe(Template tmpl, CallBack cb) {
+		check_element_owner(tmpl);
 		tmpl.setCallback(cb);
 		if (!tmpl.isAcquire())
 			Sky.getInstance().sendRequest(tmpl);
@@ -53,12 +67,14 @@ public class SkyEntry implements ISkyEntry {
 	}
 	
 	@Override
-	public void write(Item e) {
-		Sky.getInstance().write(e);
+	public void write(Item it) {
+		check_element_owner(it);
+		Sky.getInstance().write(it);
 	}
 
 	@Override
 	public List<Item> read(Template tmpl) {
+//		check_element_owner(tmpl);
 		final Semaphore sem = new Semaphore(0, false); 
 		final List<Item> ret = new ArrayList<Item>();
 		CallBack cb = new CallBack(){
@@ -91,6 +107,7 @@ public class SkyEntry implements ISkyEntry {
 
 	@Override
 	public List<Item> take(Template tmpl) {
+//		check_element_owner(tmpl);
 		final Semaphore sem = new Semaphore(0, false); 
 		final List<Item> ret = new ArrayList<Item>();
 		CallBack cb = new CallBack(){
