@@ -14,26 +14,46 @@ import com.skyspace.Template;
 public class Test {
 
 	private static int node_id;
+	private static Scanner scanner;
 	static void test_acquire() {
 		SkyEntry se = new SkyEntry("Node"+node_id);
 		
-		if (node_id == 0) {			
+		if (node_id == 0) {
 			Item it = new Item(
 					null,
 					Item.TYPE_ACQUIRABLE,
-					"test,hello,jason",
+					"test_acq,hello,jason",
 					5*60000);
 			se.write(it);
 		} else if (node_id == 1) {
-			Template tmpl = new Template(null, "test,?,jason", Template.TYPE_ACQUIRE, 60000);
+			Template tmpl = new Template(null, "test_acq,?,jason", Template.TYPE_ACQUIRE, 60000);
 			se.acquire(tmpl, null);
+			
 		} else {
 			System.err.println("node_id error:"+node_id);
 		}
-
+		scanner.next();
+		se.report_status();
 	}
 	static void test_subscribe() {
+		SkyEntry se = new SkyEntry("Node"+node_id);
 		
+		if (node_id == 1) {
+			Item it = new Item(
+					null,
+					Item.TYPE_SUBSCRIBALE,
+					"test_sub,hello,jason",
+					5*60000);
+			se.write(it);
+		} else if (node_id == 0) {
+			Template tmpl = new Template(null, "test_sub,?,?", Template.TYPE_SUBSCRIBE, 60000);
+			se.subscribe(tmpl, null);
+			
+		} else {
+			System.err.println("node_id error:"+node_id);
+		}
+		scanner.next();
+		se.report_status();
 	}
 	static void test_read() {
 		
@@ -46,7 +66,7 @@ public class Test {
 	 */
 	public static void main(String[] args) {
 		
-		Scanner scanner = new Scanner(System.in);
+		scanner = new Scanner(System.in);
 		node_id = scanner.nextInt();
 		
 		

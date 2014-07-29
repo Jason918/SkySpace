@@ -138,7 +138,9 @@ public class SkyEntry implements ISkyEntry {
 		return ret;
 	}
 
-
+	public void report_status() {
+		Sky.getInstance().report_status();
+	}
 
 	
 }

@@ -29,7 +29,7 @@ public class Sky {
 	private TemplatePool template_pool;	//store own's template
 	private NetWorker networker;
 	private Timer garbage_collector;
-	
+	private boolean is_started;
 
 	
 	/**
@@ -42,6 +42,7 @@ public class Sky {
 //		item_cache = new ItemPool();
 		template_cache = new TemplatePool();
 		template_pool = new TemplatePool();
+		is_started = false;
 		logger.finer("construct done.");
 	}
 
@@ -130,7 +131,7 @@ public class Sky {
 		return false;
 	}
 	/**
-	 * 处理新加入EnvItem的情况
+	 * 处理新加入Item的情况
 	 * @param it
 	 * @param isFromOwner
 	 * @return 返回新加入的是否被成功acquire了
@@ -196,6 +197,8 @@ public class Sky {
 	 * start the tuplespace service.
 	 */
 	public void start(int period) {
+		if (is_started) return ;
+		
 		logger.info("START service!");
 		networker.startRequestListener(this);
 		networker.startResponseListener(this);
@@ -215,17 +218,19 @@ public class Sky {
 			}
 		}, 1000, period);
 		logger.finer("start sky done.");
-
+		is_started = true;
 	}
 
 	/**
 	 * stop the tuplespace service.
 	 */
 	public void stop() {
+		
 		logger.info("STOP service!");
 		networker.stopRequestListener();
 		networker.stopResponseListener();
 		garbage_collector.cancel();
+		is_started = false;
 	}
 	
 	private int stat_item_sended = 0;
@@ -268,8 +273,14 @@ public class Sky {
 		stat_template_received = 0;
 	}
 
-//	public void clearCache() {
-//		item_cache.clear();
-//		template_cache.clear();
-//	}
+	void report_status() {
+		System.out.println("=============Current item_pool status===========");
+		System.out.println(item_pool.toListString());
+		System.out.println("=============Current template_pool status===========");
+		System.out.println(template_pool.toListString());
+		System.out.println("=============Current template_cache status===========");
+		System.out.println(template_cache.toListString());
+		System.out.println("+++++++++++++Current status END+++++++++++");
+	}
+
 }
