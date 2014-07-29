@@ -103,7 +103,7 @@ public class Sky {
 		Sky.logger.exiting("ENV", "handle_request");
 	}
 	
-	/**
+	/**1
 	 * function for handling result of request it send out.
 	 * @param it
 	 * @return 
@@ -119,6 +119,7 @@ public class Sky {
 			//System.out.println(ntmpl.owner.getAction());
 			if (ntmpl.isMany()) {
 				template_pool.addMatch(it,ntmpl);
+				//System.out.println("add match in template_pool item:"+it+"tmpl:"+ntmpl);
 			} else {
 				ntmpl.getCallback().handle(ntmpl,it);
 				template_pool.remove(ntmpl);

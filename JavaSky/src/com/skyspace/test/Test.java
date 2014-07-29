@@ -70,7 +70,7 @@ public class Test {
 	}
 	static void test_read() {
 		SkyEntry se = new SkyEntry("Node"+node_id);
-		if (node_id == 0) {			
+		if (node_id == 0) {
 			Item it = new Item(
 					null,
 					Item.TYPE_SUBSCRIBALE,
@@ -78,7 +78,7 @@ public class Test {
 					5*60000);
 			se.write(it);
 		} else if (node_id == 1) {
-			Template tmpl = new Template(null, "test,?,jasonxx", Template.TYPE_SUBSCRIBE, 60000);
+			Template tmpl = new Template(null, "test,?,jason", Template.TYPE_SUBSCRIBE|Template.TYPE_MANY, 3000);
 			List<Item> items = se.read(tmpl);
 			System.out.println("read result:"+items);
 		}
@@ -112,7 +112,7 @@ public class Test {
 		//test_acquire();
 		
 		System.out.println("\n\n..........test_subscribe()...........");
-		test_subscribe();
+		//test_subscribe();
 		
 		System.out.println("\n\n..........test_read()...........");
 		test_read();

@@ -93,7 +93,7 @@ public class TemplatePool extends ElementPool{
 			int index = matchList.indexOf(tmpl);
 			if (index >= 0) {
 				MatchItem mi = matchList.get(index);
-				Template.default_callback.handleMany(mi.tmpl, mi.itList);
+				mi.tmpl.getCallback().handleMany(mi.tmpl, mi.itList);
 				matchList.remove(index);
 			}
 		}

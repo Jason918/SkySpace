@@ -87,7 +87,9 @@ public class SkyEntry implements ISkyEntry {
 
 			@Override
 			public void handleMany(Template tmpl, ArrayList<Item> itList) {
+				
 				ret.addAll(itList);
+				//System.out.println("handling many..."+itList);
 				sem.release();
 			}
 		};
@@ -96,7 +98,8 @@ public class SkyEntry implements ISkyEntry {
 		
 		
 		try {
-			sem.tryAcquire(tmpl.expire-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+			//sem.tryAcquire(tmpl.expire-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+			sem.acquire();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
