@@ -77,6 +77,14 @@ public class Test {
 					"test,hello,jason",
 					5*60000);
 			se.write(it);
+			
+			Item it2 = new Item(
+					null,
+					Item.TYPE_SUBSCRIBALE,
+					"test,hi,jason",
+					5*60000);
+			se.write(it2);
+			
 		} else if (node_id == 1) {
 			Template tmpl = new Template(null, "test,?,jason", Template.TYPE_SUBSCRIBE|Template.TYPE_MANY, 3000);
 			List<Item> items = se.read(tmpl);

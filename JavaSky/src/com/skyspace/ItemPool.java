@@ -15,6 +15,17 @@ public class ItemPool extends ElementPool{
 		else 
 			return null;
 	}
+	
+	public List<Item> getAllMatch(Template tmpl) {
+		List<Item> result = new ArrayList<Item>();
+		
+		for (Item it : envItemList) {
+			if (tmpl.match(it)) {				
+				result.add(it);
+			}
+		}
+		return result;
+	}
 	public void lock(Item it) {
 		int index = envItemList.indexOf(it);
 		if (index >= 0) {
