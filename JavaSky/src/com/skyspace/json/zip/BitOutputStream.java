@@ -31,7 +31,6 @@ import java.io.OutputStream;
  * This is a big endian bit writer. It writes its bits to an OutputStream.
  *
  * @version 2013-04-18
- *
  */
 public class BitOutputStream implements BitWriter {
 
@@ -59,8 +58,7 @@ public class BitOutputStream implements BitWriter {
      * Use an OutputStream to produce a BitWriter. The BitWriter will send its
      * bits to the OutputStream as each byte is filled.
      *
-     * @param out
-     *            An Output Stream
+     * @param out An Output Stream
      */
     public BitOutputStream(OutputStream out) {
         this.out = out;
@@ -88,9 +86,8 @@ public class BitOutputStream implements BitWriter {
      * Pad the rest of the block with zeroes and flush. pad(8) flushes the last
      * unfinished byte. The underlying OutputStream will be flushed.
      *
-     * @param factor
-     *            The size of the block to pad. This will typically be 8, 16,
-     *            32, 64, 128, 256, etc.
+     * @param factor The size of the block to pad. This will typically be 8, 16,
+     *               32, 64, 128, 256, etc.
      * @return this
      * @throws IOException
      */
@@ -111,10 +108,8 @@ public class BitOutputStream implements BitWriter {
     /**
      * Write some bits. Up to 32 bits can be written at a time.
      *
-     * @param bits
-     *            The bits to be written.
-     * @param width
-     *            The number of bits to write. (0..32)
+     * @param bits  The bits to be written.
+     * @param width The number of bits to write. (0..32)
      * @throws IOException
      */
     public void write(int bits, int width) throws IOException {

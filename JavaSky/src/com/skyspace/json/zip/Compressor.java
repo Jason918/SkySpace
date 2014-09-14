@@ -1,14 +1,14 @@
 package com.skyspace.json.zip;
 
-import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
-
 import com.skyspace.json.JSONArray;
 import com.skyspace.json.JSONException;
 import com.skyspace.json.JSONObject;
 import com.skyspace.json.Kim;
+
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
 /*
  Copyright (c) 2013 JSON.org
@@ -45,7 +45,7 @@ import com.skyspace.json.Kim;
  * A compressor implements the compression behavior of JSONzip. It provides a
  * zip method that takes a JSONObject or JSONArray and delivers a stream of
  * bits to a BitWriter.
- *
+ * <p/>
  * FOR EVALUATION PURPOSES ONLY. THIS PACKAGE HAS NOT BEEN TESTED ADEQUATELY
  * FOR PRODUCTION USE.
  */
@@ -60,9 +60,8 @@ public class Compressor extends JSONzip {
      * Create a new compressor. It may be used for an entire session or
      * subsession.
      *
-     * @param bitwriter
-     *            The BitWriter this Compressor will output to. Don't forget to
-     *            flush.
+     * @param bitwriter The BitWriter this Compressor will output to. Don't forget to
+     *                  flush.
      */
     public Compressor(BitWriter bitwriter) {
         super();
@@ -74,8 +73,7 @@ public class Compressor extends JSONzip {
      * '9' get the codes 0 to 9. '.' is 10, '-' is 11, '+' is 12, and 'E' or
      * 'e' is 13.
      *
-     * @param digit
-     *            An ASCII character from a JSIN number.
+     * @param digit An ASCII character from a JSIN number.
      * @return
      */
     private static int bcd(char digit) {
@@ -83,14 +81,14 @@ public class Compressor extends JSONzip {
             return digit - '0';
         }
         switch (digit) {
-        case '.':
-            return 10;
-        case '-':
-            return 11;
-        case '+':
-            return 12;
-        default:
-            return 13;
+            case '.':
+                return 10;
+            case '-':
+                return 11;
+            case '+':
+                return 12;
+            default:
+                return 13;
         }
     }
 
@@ -119,10 +117,9 @@ public class Compressor extends JSONzip {
     /**
      * Pad the output to fill an allotment of bits.
      *
-     * @param factor
-     *            The size of the bit allotment. A value of 8 will complete and
-     *            flush the current byte. If you don't pad, then some of the
-     *            last bits might not be sent to the Output Stream.
+     * @param factor The size of the bit allotment. A value of 8 will complete and
+     *               flush the current byte. If you don't pad, then some of the
+     *               last bits might not be sent to the Output Stream.
      * @throws JSONException
      */
     public void pad(int factor) throws JSONException {
@@ -136,10 +133,8 @@ public class Compressor extends JSONzip {
     /**
      * Write a number, using the number of bits necessary to hold the number.
      *
-     * @param integer
-     *            The value to be encoded.
-     * @param width
-     *            The number of bits to encode the value, between 0 and 32.
+     * @param integer The value to be encoded.
+     * @param width   The number of bits to encode the value, between 0 and 32.
      * @throws JSONException
      */
     private void write(int integer, int width) throws JSONException {
@@ -157,10 +152,8 @@ public class Compressor extends JSONzip {
      * Write an integer with Huffman encoding. The bit pattern that is written
      * will be determined by the Huffman encoder.
      *
-     * @param integer
-     *            The value to be written.
-     * @param huff
-     *            The Huffman encoder.
+     * @param integer The value to be written.
+     * @param huff    The Huffman encoder.
      * @throws JSONException
      */
     private void write(int integer, Huff huff) throws JSONException {
@@ -170,10 +163,8 @@ public class Compressor extends JSONzip {
     /**
      * Write each of the bytes in a kim with Huffman encoding.
      *
-     * @param kim
-     *            A kim containing the bytes to be written.
-     * @param huff
-     *            The Huffman encoder.
+     * @param kim  A kim containing the bytes to be written.
+     * @param huff The Huffman encoder.
      * @throws JSONException
      */
     private void write(Kim kim, Huff huff) throws JSONException {
@@ -183,14 +174,10 @@ public class Compressor extends JSONzip {
     /**
      * Write a range of bytes from a Kim with Huffman encoding.
      *
-     * @param kim
-     *            A Kim containing the bytes to be written.
-     * @param from
-     *            The index of the first byte to write.
-     * @param thru
-     *            The index after the last byte to write.
-     * @param huff
-     *            The Huffman encoder.
+     * @param kim  A Kim containing the bytes to be written.
+     * @param from The index of the first byte to write.
+     * @param thru The index after the last byte to write.
+     * @param huff The Huffman encoder.
      * @throws JSONException
      */
     private void write(Kim kim, int from, int thru, Huff huff)
@@ -204,10 +191,8 @@ public class Compressor extends JSONzip {
      * Write an integer, using the number of bits necessary to hold the number
      * as determined by its keep, and increment its usage count in the keep.
      *
-     * @param integer
-     *            The value to be encoded.
-     * @param keep
-     *            The Keep that the integer is one of.
+     * @param integer The value to be encoded.
+     * @param keep    The Keep that the integer is one of.
      * @throws JSONException
      */
     private void writeAndTick(int integer, Keep keep) throws JSONException {
@@ -276,10 +261,9 @@ public class Compressor extends JSONzip {
     /**
      * Write a JSON value.
      *
-     * @param value
-     *            One of these types: JSONObject, JSONArray (or Map or
-     *            Collection or array), Number (or Integer or Long or Double),
-     *            or String, or Boolean, or JSONObject.NULL, or null.
+     * @param value One of these types: JSONObject, JSONArray (or Map or
+     *              Collection or array), Number (or Integer or Long or Double),
+     *              or String, or Boolean, or JSONObject.NULL, or null.
      * @throws JSONException
      */
     private void writeJSON(Object value) throws JSONException {
@@ -492,8 +476,7 @@ public class Compressor extends JSONzip {
     /**
      * Write a value.
      *
-     * @param value
-     *            One of these types: Boolean, Number, etc.
+     * @param value One of these types: Boolean, Number, etc.
      * @throws JSONException
      */
     private void writeValue(Object value) throws JSONException {
@@ -541,7 +524,6 @@ public class Compressor extends JSONzip {
      * Output a zero bit.
      *
      * @throws JSONException
-     *
      * @throws IOException
      */
     private void zero() throws JSONException {

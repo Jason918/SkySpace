@@ -1,8 +1,8 @@
 package com.skyspace.json.zip;
 
-import java.util.HashMap;
-
 import com.skyspace.json.Kim;
+
+import java.util.HashMap;
 
 /*
  Copyright (c) 2013 JSON.org
@@ -41,9 +41,9 @@ class MapKeep extends Keep {
 
     /**
      * Create a new Keep.
-     * @param bits
-     *              The capacity of the keep expressed in the number of bits
-     *              required to hold an integer.
+     *
+     * @param bits The capacity of the keep expressed in the number of bits
+     *             required to hold an integer.
      */
     public MapKeep(int bits) {
         super(bits);
@@ -85,8 +85,7 @@ class MapKeep extends Keep {
      * Find the integer value associated with this key, or nothing if this key
      * is not in the keep.
      *
-     * @param key
-     *            An object.
+     * @param key An object.
      * @return An integer
      */
     public int find(Object key) {
@@ -128,6 +127,7 @@ class MapKeep extends Keep {
     /**
      * Register a value in the keep. Compact the keep if it is full. The next
      * time this value is encountered, its integer can be sent instead.
+     *
      * @param value A value.
      */
     public void register(Object value) {
@@ -151,6 +151,7 @@ class MapKeep extends Keep {
 
     /**
      * Return the value associated with the integer.
+     *
      * @param integer The number of an item in the keep.
      * @return The value.
      */

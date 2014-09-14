@@ -48,8 +48,7 @@ abstract class Keep implements None, PostMortem {
     /**
      * When an item ages, its use count is reduced by at least half.
      *
-     * @param use
-     *            The current use count of an item.
+     * @param use The current use count of an item.
      * @return The new use count for that item.
      */
     public static long age(long use) {
@@ -77,6 +76,7 @@ abstract class Keep implements None, PostMortem {
 
     /**
      * Get the value associated with an integer.
+     *
      * @param integer The number of an item in the keep.
      * @return The value.
      */

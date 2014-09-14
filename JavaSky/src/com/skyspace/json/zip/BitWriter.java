@@ -22,11 +22,10 @@ public interface BitWriter {
     /**
      * Pad the rest of the block with zeros and flush.
      *
-     * @param factor
-     *            The size in bits of the block to pad. This will typically be
-     *            8, 16, 32, 64, 128, 256, etc.
+     * @param factor The size in bits of the block to pad. This will typically be
+     *               8, 16, 32, 64, 128, 256, etc.
      * @return true if the block was zero padded, or false if the the padding
-     *         contains any one bits.
+     * contains any one bits.
      * @throws IOException
      */
     public void pad(int factor) throws IOException;
@@ -34,10 +33,8 @@ public interface BitWriter {
     /**
      * Write some bits. Up to 32 bits can be written at a time.
      *
-     * @param bits
-     *            The bits to be written.
-     * @param width
-     *            The number of bits to write. (0..32)
+     * @param bits  The bits to be written.
+     * @param width The number of bits to write. (0..32)
      * @throws IOException
      */
     public void write(int bits, int width) throws IOException;

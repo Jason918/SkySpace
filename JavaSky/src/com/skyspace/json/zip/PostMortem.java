@@ -31,7 +31,7 @@ package com.skyspace.json.zip;
  * same internal data structures were constructed on both ends. If those
  * structures are not equivalent, then it is likely that the implementations
  * are not correct, even if convention tests are passed.
- *
+ * <p/>
  * PostMortem allows for testing of deep structures without breaking
  * encapsulation.
  */
@@ -39,8 +39,7 @@ public interface PostMortem {
     /**
      * Determine if two objects are equivalent.
      *
-     * @param pm
-     *            Another object of the same type.
+     * @param pm Another object of the same type.
      * @return true if they match.
      */
     public boolean postMortem(PostMortem pm);

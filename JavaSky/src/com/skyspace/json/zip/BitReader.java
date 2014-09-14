@@ -20,11 +20,10 @@ public interface BitReader {
     /**
      * Check that the rest of the block has been padded with zeroes.
      *
-     * @param factor
-     *            The size in bits of the block to pad. This will typically be
-     *            8, 16, 32, 64, 128, 256, etc.
+     * @param factor The size in bits of the block to pad. This will typically be
+     *               8, 16, 32, 64, 128, 256, etc.
      * @return true if the block was zero padded, or false if the the padding
-     *         contained any one bits.
+     * contained any one bits.
      * @throws IOException
      */
     public boolean pad(int factor) throws IOException;
@@ -32,10 +31,9 @@ public interface BitReader {
     /**
      * Read some bits.
      *
-     * @param width
-     *            The number of bits to read. (0..32)
-     * @throws IOException
+     * @param width The number of bits to read. (0..32)
      * @return the bits
+     * @throws IOException
      */
     public int read(int width) throws IOException;
 }

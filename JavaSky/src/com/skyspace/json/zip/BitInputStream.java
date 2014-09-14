@@ -31,13 +31,12 @@ import java.io.InputStream;
  * This is a big endian bit reader. It reads its bits from an InputStream.
  *
  * @version 2013-04-18
- *
  */
 public class BitInputStream implements BitReader {
     /**
      * 2^n - 1
      */
-    static final int[] mask = { 0, 1, 3, 7, 15, 31, 63, 127, 255 };
+    static final int[] mask = {0, 1, 3, 7, 15, 31, 63, 127, 255};
 
     /**
      * The number of bits remaining in the current byte.
@@ -63,8 +62,7 @@ public class BitInputStream implements BitReader {
      * Make a BitReader from an InputStream. The BitReader will take bytes from
      * the InputStream and unpack them into bits.
      *
-     * @param in
-     *            An InputStream.
+     * @param in An InputStream.
      */
     public BitInputStream(InputStream in) {
         this.in = in;
@@ -76,10 +74,8 @@ public class BitInputStream implements BitReader {
      * at the first byte of a stream before deciding that it should be read as
      * bits.
      *
-     * @param in
-     *            An InputStream
-     * @param firstByte
-     *            The first byte, which was probably read from in.
+     * @param in        An InputStream
+     * @param firstByte The first byte, which was probably read from in.
      */
     public BitInputStream(InputStream in, int firstByte) {
         this.in = in;
@@ -111,11 +107,10 @@ public class BitInputStream implements BitReader {
     /**
      * Check that the rest of the block has been padded with zeroes.
      *
-     * @param factor
-     *            The size of the block to pad. This will typically be 8, 16,
-     *            32, 64, 128, 256, etc.
+     * @param factor The size of the block to pad. This will typically be 8, 16,
+     *               32, 64, 128, 256, etc.
      * @return true if the block was zero padded, or false if the the padding
-     *         contains any one bits.
+     * contains any one bits.
      * @throws IOException
      */
     public boolean pad(int factor) throws IOException {
@@ -133,10 +128,9 @@ public class BitInputStream implements BitReader {
     /**
      * Read some bits.
      *
-     * @param width
-     *            The number of bits to read. (0..32)
-     * @throws IOException
+     * @param width The number of bits to read. (0..32)
      * @return the bits
+     * @throws IOException
      */
     public int read(int width) throws IOException {
         if (width == 0) {

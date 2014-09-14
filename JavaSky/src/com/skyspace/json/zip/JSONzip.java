@@ -35,10 +35,10 @@ package com.skyspace.json.zip;
  * substantially reduced. It uses a character encoding called Kim (Keep it
  * minimal) that is smaller than UTF-8 for most East European, African, and
  * Asian scripts.
- *
+ * <p/>
  * JSONzip tends to reduce most content by about half. If there is a lot of
  * recurring information, the reduction can be much more dramatic.
- *
+ * <p/>
  * FOR EVALUATION PURPOSES ONLY. THIS PACKAGE HAS NOT YET BEEN TESTED
  * ADEQUATELY FOR PRODUCTION USE.
  *
@@ -50,15 +50,15 @@ public abstract class JSONzip implements None, PostMortem {
      * Powers of 2.
      */
     public static final int[] twos = {
-        1, 2, 4, 8, 16, 32, 64, 128, 256, 512,
-        1024, 2048, 4096, 8192, 16384, 32768, 65536
+            1, 2, 4, 8, 16, 32, 64, 128, 256, 512,
+            1024, 2048, 4096, 8192, 16384, 32768, 65536
     };
 
     /**
      * The characters in JSON numbers can be reduced to 4 bits each.
      */
     public static final byte[] bcd = {
-        '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-', '+', 'E'
+            '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '-', '+', 'E'
     };
 
     /**
@@ -205,14 +205,6 @@ public abstract class JSONzip implements None, PostMortem {
     }
 
     /**
-     *
-     */
-    protected void begin() {
-        this.namehuff.generate();
-        this.substringhuff.generate();
-    }
-
-    /**
      * Write an end-of-line to the console.
      */
     static void log() {
@@ -259,6 +251,14 @@ public abstract class JSONzip implements None, PostMortem {
         } else {
             log(integer, width);
         }
+    }
+
+    /**
+     *
+     */
+    protected void begin() {
+        this.namehuff.generate();
+        this.substringhuff.generate();
     }
 
     /**

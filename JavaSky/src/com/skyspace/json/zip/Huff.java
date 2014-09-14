@@ -37,7 +37,7 @@ import com.skyspace.json.JSONException;
  * map to characters or other symbols. Symbols that are used frequently are
  * given shorter codes than symbols that are used infrequently. This usually
  * produces shorter messages.
- *
+ * <p/>
  * Initially, all of the symbols are given the same weight. The weight of a
  * symbol is incremented by the tick method. The generate method is used to
  * generate the encoding table. The table must be generated before encoding or
@@ -70,65 +70,10 @@ public class Huff implements None, PostMortem {
      */
     private int width;
 
-    private static class Symbol implements PostMortem {
-        public Symbol back;
-        public Symbol next;
-        public Symbol zero;
-        public Symbol one;
-        public final int integer;
-        public long weight;
-
-        /**
-         * Make a symbol representing a character or other value.
-         *
-         * @param integer
-         *            The symbol's number
-         */
-        public Symbol(int integer) {
-            this.integer = integer;
-            this.weight = 0;
-            this.next = null;
-            this.back = null;
-            this.one = null;
-            this.zero = null;
-        }
-
-        public boolean postMortem(PostMortem pm) {
-            boolean result = true;
-            Symbol that = (Symbol) pm;
-
-            if (this.integer != that.integer || this.weight != that.weight) {
-                return false;
-            }
-            if ((this.back != null) != (that.back != null)) {
-                return false;
-            }
-            Symbol zero = this.zero;
-            Symbol one = this.one;
-            if (zero == null) {
-                if (that.zero != null) {
-                    return false;
-                }
-            } else {
-                result = zero.postMortem(that.zero);
-            }
-            if (one == null) {
-                if (that.one != null) {
-                    return false;
-                }
-            } else {
-                result = one.postMortem(that.one);
-            }
-            return result;
-        }
-
-    }
-
     /**
      * Construct a Huffman encoder/decoder.
      *
-     * @param domain
-     *            The number of values known to the object.
+     * @param domain The number of values known to the object.
      */
     public Huff(int domain) {
         this.domain = domain;
@@ -306,8 +251,7 @@ public class Huff implements None, PostMortem {
      * Read bits until a symbol can be identified. The weight of the read
      * symbol will be incremented.
      *
-     * @param bitreader
-     *            The source of bits.
+     * @param bitreader The source of bits.
      * @return The integer value of the symbol.
      * @throws JSONException
      */
@@ -332,8 +276,7 @@ public class Huff implements None, PostMortem {
     /**
      * Increase by 1 the weight associated with a value.
      *
-     * @param value
-     *            The number of the symbol to tick
+     * @param value The number of the symbol to tick
      * @return this
      */
     public void tick(int value) {
@@ -344,10 +287,8 @@ public class Huff implements None, PostMortem {
     /**
      * Increase by 1 the weight associated with a range of values.
      *
-     * @param from
-     *            The first symbol to tick
-     * @param to
-     *            The last symbol to tick
+     * @param from The first symbol to tick
+     * @param to   The last symbol to tick
      * @return this
      */
     public void tick(int from, int to) {
@@ -360,10 +301,8 @@ public class Huff implements None, PostMortem {
      * Recur from a symbol back, emitting bits. We recur before emitting to
      * make the bits come out in the right order.
      *
-     * @param symbol
-     *            The symbol to write.
-     * @param bitwriter
-     *            The bitwriter to write it to.
+     * @param symbol    The symbol to write.
+     * @param bitwriter The bitwriter to write it to.
      * @throws JSONException
      */
     private void write(Symbol symbol, BitWriter bitwriter)
@@ -388,10 +327,8 @@ public class Huff implements None, PostMortem {
      * Write the bits corresponding to a symbol. The weight of the symbol will
      * be incremented.
      *
-     * @param value
-     *            The number of the symbol to write
-     * @param bitwriter
-     *            The destination of the bits.
+     * @param value     The number of the symbol to write
+     * @param bitwriter The destination of the bits.
      * @return this
      * @throws JSONException
      */
@@ -402,5 +339,58 @@ public class Huff implements None, PostMortem {
         if (JSONzip.probe) {
             JSONzip.logchar(value, this.width);
         }
+    }
+
+    private static class Symbol implements PostMortem {
+        public final int integer;
+        public Symbol back;
+        public Symbol next;
+        public Symbol zero;
+        public Symbol one;
+        public long weight;
+
+        /**
+         * Make a symbol representing a character or other value.
+         *
+         * @param integer The symbol's number
+         */
+        public Symbol(int integer) {
+            this.integer = integer;
+            this.weight = 0;
+            this.next = null;
+            this.back = null;
+            this.one = null;
+            this.zero = null;
+        }
+
+        public boolean postMortem(PostMortem pm) {
+            boolean result = true;
+            Symbol that = (Symbol) pm;
+
+            if (this.integer != that.integer || this.weight != that.weight) {
+                return false;
+            }
+            if ((this.back != null) != (that.back != null)) {
+                return false;
+            }
+            Symbol zero = this.zero;
+            Symbol one = this.one;
+            if (zero == null) {
+                if (that.zero != null) {
+                    return false;
+                }
+            } else {
+                result = zero.postMortem(that.zero);
+            }
+            if (one == null) {
+                if (that.one != null) {
+                    return false;
+                }
+            } else {
+                result = one.postMortem(that.one);
+            }
+            return result;
+        }
+
     }
 }

@@ -31,144 +31,6 @@ import com.skyspace.json.Kim;
  */
 class TrieKeep extends Keep {
 
-    /**
-     * The trie is made of nodes.
-     */
-    class Node implements PostMortem {
-        private int integer;
-        private Node[] next;
-
-        /**
-         * Each non-leaf node contains links to up to 256 next nodes. Each node
-         * has an integer value.
-         */
-        public Node() {
-            this.integer = none;
-            this.next = null;
-        }
-
-        /**
-         * Get one of a node's 256 links. If it is a leaf node, it returns
-         * null.
-         *
-         * @param cell
-         *            A integer between 0 and 255.
-         * @return
-         */
-        public Node get(int cell) {
-            return this.next == null ? null : this.next[cell];
-        }
-
-        /**
-         * Get one of a node's 256 links. If it is a leap node, it returns
-         * null. The argument is treated as an unsigned integer.
-         *
-         * @param cell
-         *            A byte.
-         * @return
-         */
-        public Node get(byte cell) {
-            return get(((int) cell) & 0xFF);
-        }
-
-        /**
-         * Compare two nodes. Their lengths must be equal. Their links must
-         * also compare.
-         */
-        public boolean postMortem(PostMortem pm) {
-            Node that = (Node) pm;
-            if (that == null) {
-                JSONzip.log("\nMisalign");
-                return false;
-            }
-            if (this.integer != that.integer) {
-                JSONzip.log("\nInteger " + this.integer + " <> " +
-                        that.integer);
-                return false;
-            }
-            if (this.next == null) {
-                if (that.next == null) {
-                    return true;
-                }
-                JSONzip.log("\nNext is null " + this.integer);
-                return false;
-            }
-            for (int i = 0; i < 256; i += 1) {
-                Node node = this.next[i];
-                if (node != null) {
-                    if (!node.postMortem(that.next[i])) {
-                        return false;
-                    }
-                } else if (that.next[i] != null) {
-                    JSONzip.log("\nMisalign " + i);
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        /**
-         * Set a node's link to another node.
-         *
-         * @param cell
-         *            An integer between 0 and 255.
-         * @param node
-         *            The new value for the cell.
-         */
-        public void set(int cell, Node node) {
-            if (this.next == null) {
-                this.next = new Node[256];
-            }
-            if (JSONzip.probe) {
-                if (node == null || this.next[cell] != null) {
-                    JSONzip.log("\nUnexpected set.\n");
-                }
-            }
-            this.next[cell] = node;
-        }
-
-        /**
-         * Set a node's link to another node.
-         *
-         * @param cell
-         *            A byte.
-         * @param node
-         *            The new value for the cell.
-         */
-        public void set(byte cell, Node node) {
-            set(((int) cell) & 0xFF, node);
-        }
-
-        /**
-         * Get one of a node's 256 links. It will not return null. If there is
-         * no link, then a link is manufactured.
-         *
-         * @param cell
-         *            A integer between 0 and 255.
-         * @return
-         */
-        public Node vet(int cell) {
-            Node node = get(cell);
-            if (node == null) {
-                node = new Node();
-                set(cell, node);
-            }
-            return node;
-        }
-
-        /**
-         * Get one of a node's 256 links. It will not return null. If there is
-         * no link, then a link is manufactured.
-         *
-         * @param cell
-         *            A byte.
-         * @return
-         */
-        public Node vet(byte cell) {
-            return vet(((int) cell) & 0xFF);
-        }
-    }
-
     private int[] froms;
     private int[] thrus;
     private Node root;
@@ -177,9 +39,8 @@ class TrieKeep extends Keep {
     /**
      * Create a new Keep of kims.
      *
-     * @param bits
-     *            The log2 of the capacity of the Keep. For example, if bits is
-     *            12, then the keep's capacity will be 4096.
+     * @param bits The log2 of the capacity of the Keep. For example, if bits is
+     *             12, then the keep's capacity will be 4096.
      */
     public TrieKeep(int bits) {
         super(bits);
@@ -223,8 +84,7 @@ class TrieKeep extends Keep {
      * Find the integer value associated with this key, or nothing if this key
      * is not in the keep.
      *
-     * @param key
-     *            An object.
+     * @param key An object.
      * @return An integer
      */
     public int match(Kim kim, int from, int thru) {
@@ -392,5 +252,135 @@ class TrieKeep extends Keep {
 
     public Object value(int integer) {
         return kim(integer);
+    }
+
+    /**
+     * The trie is made of nodes.
+     */
+    class Node implements PostMortem {
+        private int integer;
+        private Node[] next;
+
+        /**
+         * Each non-leaf node contains links to up to 256 next nodes. Each node
+         * has an integer value.
+         */
+        public Node() {
+            this.integer = none;
+            this.next = null;
+        }
+
+        /**
+         * Get one of a node's 256 links. If it is a leaf node, it returns
+         * null.
+         *
+         * @param cell A integer between 0 and 255.
+         * @return
+         */
+        public Node get(int cell) {
+            return this.next == null ? null : this.next[cell];
+        }
+
+        /**
+         * Get one of a node's 256 links. If it is a leap node, it returns
+         * null. The argument is treated as an unsigned integer.
+         *
+         * @param cell A byte.
+         * @return
+         */
+        public Node get(byte cell) {
+            return get(((int) cell) & 0xFF);
+        }
+
+        /**
+         * Compare two nodes. Their lengths must be equal. Their links must
+         * also compare.
+         */
+        public boolean postMortem(PostMortem pm) {
+            Node that = (Node) pm;
+            if (that == null) {
+                JSONzip.log("\nMisalign");
+                return false;
+            }
+            if (this.integer != that.integer) {
+                JSONzip.log("\nInteger " + this.integer + " <> " +
+                        that.integer);
+                return false;
+            }
+            if (this.next == null) {
+                if (that.next == null) {
+                    return true;
+                }
+                JSONzip.log("\nNext is null " + this.integer);
+                return false;
+            }
+            for (int i = 0; i < 256; i += 1) {
+                Node node = this.next[i];
+                if (node != null) {
+                    if (!node.postMortem(that.next[i])) {
+                        return false;
+                    }
+                } else if (that.next[i] != null) {
+                    JSONzip.log("\nMisalign " + i);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        /**
+         * Set a node's link to another node.
+         *
+         * @param cell An integer between 0 and 255.
+         * @param node The new value for the cell.
+         */
+        public void set(int cell, Node node) {
+            if (this.next == null) {
+                this.next = new Node[256];
+            }
+            if (JSONzip.probe) {
+                if (node == null || this.next[cell] != null) {
+                    JSONzip.log("\nUnexpected set.\n");
+                }
+            }
+            this.next[cell] = node;
+        }
+
+        /**
+         * Set a node's link to another node.
+         *
+         * @param cell A byte.
+         * @param node The new value for the cell.
+         */
+        public void set(byte cell, Node node) {
+            set(((int) cell) & 0xFF, node);
+        }
+
+        /**
+         * Get one of a node's 256 links. It will not return null. If there is
+         * no link, then a link is manufactured.
+         *
+         * @param cell A integer between 0 and 255.
+         * @return
+         */
+        public Node vet(int cell) {
+            Node node = get(cell);
+            if (node == null) {
+                node = new Node();
+                set(cell, node);
+            }
+            return node;
+        }
+
+        /**
+         * Get one of a node's 256 links. It will not return null. If there is
+         * no link, then a link is manufactured.
+         *
+         * @param cell A byte.
+         * @return
+         */
+        public Node vet(byte cell) {
+            return vet(((int) cell) & 0xFF);
+        }
     }
 }
