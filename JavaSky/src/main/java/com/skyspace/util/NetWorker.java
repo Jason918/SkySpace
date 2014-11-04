@@ -108,13 +108,17 @@ public class NetWorker {
                         InetAddress inetAddress = enumIpAddr.nextElement();
                         if (!inetAddress.isLoopbackAddress()) {
                             ipv4 = inetAddress.getHostAddress().toString();
-                            if (ipv4.startsWith("192")) {
+                            if (ipv4.matches("\\d+.\\d+.\\d+.\\d+")) {
                                 Sky.logger.info("local ip:" + ipv4);
                                 return ipv4;
-                            } else {
-                                Sky.logger.info("false ip" + ipv4);
-                                ipv4 = null;
                             }
+//                            if (ipv4.startsWith("192")) {
+//                                Sky.logger.info("local ip:" + ipv4);
+//                                return ipv4;
+//                            } else {
+//                                Sky.logger.info("false ip" + ipv4);
+//                                ipv4 = null;
+//                            }
                         }
                     }
                 }
