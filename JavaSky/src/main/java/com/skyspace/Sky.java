@@ -93,7 +93,7 @@ public class Sky {
             }
         }
         if (result.size() == 0) {// not in pool ,trying cache.
-            Sky.logger.fine("ingoring cache~");
+            Sky.logger.fine("no result for request");
             // it = item_cache.getMatch(tmpl);
             // if (it == null) { //not in the cache itther.put it in buffer.
             // Sky.logger.fine("no match in envItemCache");
@@ -116,6 +116,9 @@ public class Sky {
                     networker.sendResult(it, tmpl, true);
                 }
             }
+        }
+        if (result.size()==0 || tmpl.isMany()){
+            template_cache.add(tmpl);
         }
         Sky.logger.exiting("ENV", "handle_request");
     }

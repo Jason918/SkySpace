@@ -9,7 +9,7 @@ import com.skyspace.util.ObjectProxy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
-
+import java.util.concurrent.TimeUnit;
 
 public class SkyEntry implements ISkyEntry {
     public static int DEFAULT_TIME = 60000;
@@ -85,6 +85,7 @@ public class SkyEntry implements ISkyEntry {
             @Override
             public void handle(Template tmpl, Item it) {
                 ret.add(it);
+                System.out.println("handling single..."+it);
                 sem.release();
             }
 
@@ -101,8 +102,7 @@ public class SkyEntry implements ISkyEntry {
 
 
         try {
-            //sem.tryAcquire(tmpl.expire-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-            sem.acquire();
+            sem.tryAcquire(tmpl.getTimeout(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -134,8 +134,7 @@ public class SkyEntry implements ISkyEntry {
         acquire(tmpl, cb);
 
         try {
-//			sem.tryAcquire(tmpl.expire-System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-            sem.acquire();
+			sem.tryAcquire(tmpl.getTimeout(), TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

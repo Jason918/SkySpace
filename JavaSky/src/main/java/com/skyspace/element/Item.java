@@ -85,7 +85,7 @@ public class Item extends Element {
     public String toString() {
 
         return "Item\n-[owner]:" + owner
-                + "\n-[type]:" + Integer.toHexString(type)
+                + "\n-[type]:0x" + Integer.toHexString(type)
                 + ",isSubscribale:" + isSubscribale()
                 + ",isAcquirable:" + isAcquirable()
                 + ",isSinglton:" + isSinglton()

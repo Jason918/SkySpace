@@ -126,6 +126,8 @@ public class Template extends Element {
                     return false;
                 }
             }
+        } else {
+            return false;
         }
         Sky.logger.exiting("Template", "match");
         return true;

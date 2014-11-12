@@ -17,6 +17,7 @@ import java.util.logging.SimpleFormatter;
 public class Test {
 
     private static int node_id;
+
     private static Scanner scanner;
 
     static void test_acquire() {
@@ -30,7 +31,8 @@ public class Test {
                     5 * 60000);
             se.write(it);
         } else if (node_id == 1) {
-            Template tmpl = new Template(null, "test,?,jason", Template.TYPE_ACQUIRE, 60000);
+            Template tmpl = new Template(null, "test,?,jason",
+                    Template.TYPE_ACQUIRE, 60000);
             se.acquire(tmpl, new CallBack() {
 
                 @Override
@@ -61,7 +63,8 @@ public class Test {
                     5 * 60000);
             se.write(it);
         } else if (node_id == 0) {
-            Template tmpl = new Template(null, "test_sub,?,?", Template.TYPE_SUBSCRIBE, 60000);
+            Template tmpl = new Template(null, "test_sub,?,?",
+                    Template.TYPE_SUBSCRIBE, 60000);
             se.subscribe(tmpl, null);
 
         } else {
@@ -88,15 +91,32 @@ public class Test {
                     5 * 60000);
             se.write(it2);
 
-        } else if (node_id == 1) {
-            Template tmpl = new Template(null, "test,?,jason", Template.TYPE_SUBSCRIBE | Template.TYPE_MANY, 3000);
+        }
+        if (node_id == 1) {
+            Template tmpl = new Template(null, "test,?,jason",
+                    Template.TYPE_SUBSCRIBE | Template.TYPE_MANY, 3000);
             List<Item> items = se.read(tmpl);
             System.out.println("read result:" + items);
         }
     }
 
     static void test_take() {
+        final SkyEntry se = new SkyEntry("Node" + node_id);
 
+        new Thread(new Runnable() {
+            @Override public void run() {
+                Template tmpl = new Template(null, "test,?,?",
+                        Template.TYPE_ACQUIRE, 6000000);
+                List<Item> items = se.take(tmpl);
+                System.out.println("read result:" + items);
+            }
+        }).start();
+        Item it2 = new Item(
+                null,
+                Item.TYPE_SUBSCRIBALE|Item.TYPE_ACQUIRABLE,
+                "test,hi,jason",
+                1000);
+        se.write(it2);
     }
 
     /**
@@ -106,7 +126,6 @@ public class Test {
 
         scanner = new Scanner(System.in);
         node_id = scanner.nextInt();
-
 
         Sky.logger.setLevel(Level.ALL);
 
@@ -128,14 +147,13 @@ public class Test {
         //test_subscribe();
 
         System.out.println("\n\n..........test_read()...........");
-        test_read();
+        //test_read();
 
         System.out.println("\n\n..........test_take()...........");
         test_take();
 
-
         //System.out.println("\n\nTEST FINISHED, enter a new line to finish.");
-//		scanner.nextLine();
+        //		scanner.nextLine();
         //scanner.close();
 
     }

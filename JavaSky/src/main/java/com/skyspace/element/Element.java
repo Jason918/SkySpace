@@ -91,4 +91,8 @@ public abstract class Element {
         this.owner = owner;
     }
 
+    public long getTimeout() {
+        return Math.max(this.expire - System.currentTimeMillis(),0);
+    }
+
 }

@@ -57,7 +57,7 @@ public class SkyController {
     public List<Item> take(@RequestParam(value = "isMulti", required = false, defaultValue = "false") boolean isMulti,
                            @RequestParam(value = "content", required = true, defaultValue = "") String template,
                            @RequestParam(value = "timeout", required = false, defaultValue = "30000") int timeout) {
-        LOG.info("write,[isMulti={}] [template={}] [timeout={}] ", isMulti, template, timeout);
+        LOG.info("take,[isMulti={}] [template={}] [timeout={}] ", isMulti, template, timeout);
         int type = Template.TYPE_ACQUIRE;
         if (isMulti) {
             type |= Template.TYPE_MANY;
