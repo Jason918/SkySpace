@@ -37,6 +37,7 @@ public class SkyController {
         }
         Item item = new Item(null, type, tuple, expire);
         entry.write(item);
+        LOG.info("write finish");
         return true;
     }
 
@@ -50,7 +51,9 @@ public class SkyController {
             type |= Template.TYPE_MANY;
         }
         Template tmpl = new Template(null, template, type, timeout);
-        return entry.read(tmpl);
+        List<Item> items = entry.read(tmpl);
+        LOG.info("read finish");
+        return items;
     }
 
     @RequestMapping("/skyentry/take")
@@ -63,6 +66,8 @@ public class SkyController {
             type |= Template.TYPE_MANY;
         }
         Template tmpl = new Template(null, template, type, timeout);
-        return entry.take(tmpl);
+        List<Item> items = entry.take(tmpl);
+        LOG.info("take finish");
+        return items;
     }
 }

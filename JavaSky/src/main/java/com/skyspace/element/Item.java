@@ -1,5 +1,6 @@
 package com.skyspace.element;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.skyspace.Sky;
 import com.skyspace.json.JSONException;
 import com.skyspace.json.JSONObject;
@@ -54,14 +55,17 @@ public class Item extends Element {
         setMemberByJSON(jo);
     }
 
+    @JsonIgnore
     public boolean isSubscribale() {
         return (type & TYPE_SUBSCRIBALE) != 0;
     }
 
+    @JsonIgnore
     public boolean isAcquirable() {
         return (type & TYPE_ACQUIRABLE) != 0;
     }
 
+    @JsonIgnore
     public boolean isSinglton() {
         return (type & TYPE_SINGLETON) != 0;
     }
@@ -79,6 +83,9 @@ public class Item extends Element {
         jo.put("tuple", content);
         jo.put("expire", expire);
         return jo.toString();
+    }
+
+    public Item() {
     }
 
     @Override

@@ -15,12 +15,16 @@ public interface IResPoolClient {
      */
     Object getResValue(String name, int clock);
 
+    <T> T getResValue(String name, int clock, Class<T> clazz);
+
     /**
      * 获取资源的所有时刻的值。
      * @param name 资源的名字。
      * @return 资源的值的列表，列表的长度等于当前clock。
      */
     List<?> getResValue(String name);
+
+    <T> List<T> getResValue(String name, Class<T[]> clazz);
 
     /**
      * 设置指定资源的值。
@@ -33,5 +37,5 @@ public interface IResPoolClient {
      * 让平台时钟前进clockCount个。
      * @param clockCount 时钟前进的量， 精确到0.5。
      */
-    void ticktock(float clockCount);
+    void ticktock(double clockCount);
 }

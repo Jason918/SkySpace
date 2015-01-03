@@ -9,6 +9,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,44 +24,40 @@ public class SkyClient {
 
     RestTemplate restTemplate = new RestTemplate();
 
-    public String write(Object... contentItems) {
-        String content = encodeContent(contentItems);
-        String hash = DigestUtils.sha1Hex(content);
+    public String write(String... tuple) {
+        String content = StringUtils.join(tuple, ",");
+        String content_id = DigestUtils.sha1Hex(String.valueOf(Math.random()));
         MultiValueMap<String, Object> data = new LinkedMultiValueMap<String, Object>();
-        data.add("content", content);
+        data.add("content", content + "," + content_id);
         data.add("type", -1);
         data.add("expire", 3000);
         restTemplate.postForObject(SKY_SERVER + WRITE_URL, data, String.class);
-        return hash;
+        return content_id;
     }
 
-    public List<Object> read(Object... contentItems) {
-        String content = encodeContent(contentItems);
-//        String hash = DigestUtils.sha1Hex(content);
+    public List<String> read(String... template) {
+        return readOrTake(SKY_SERVER + READ_URL, template);
+    }
+
+    public List<String> take(String... template) {
+        return readOrTake(SKY_SERVER + TAKE_URL, template);
+    }
+
+    private List<String> readOrTake(String requestUrl, String[] template) {
+        String content = StringUtils.join(template, ",");
         MultiValueMap<String, Object> data = new LinkedMultiValueMap<String, Object>();
         data.add("content", content);
         data.add("isMulti", false);
         data.add("timeout", 500);
-        Item[] items = restTemplate.postForObject(SKY_SERVER + READ_URL, data, Item[].class);
+        Item[] items = restTemplate.postForObject(requestUrl, data, Item[].class);
 
         if (items != null && items.length == 1) {
-            return decodeContent(items[0].getContent());
-        } else {
-            return null;
-        }
-    }
-
-    public List<Object> take(Object... contentItems) {
-        String content = encodeContent(contentItems);
-//        String hash = DigestUtils.sha1Hex(content);
-        MultiValueMap<String, Object> data = new LinkedMultiValueMap<String, Object>();
-        data.add("content", content);
-        data.add("isMulti", false);
-        data.add("timeout", 500);
-        Item[] items = restTemplate.postForObject(SKY_SERVER + WRITE_URL, data, Item[].class);
-
-        if (items != null && items.length == 1) {
-            return decodeContent(items[0].getContent());
+            String content1 = items[0].getContent();
+            if (StringUtils.isBlank(content1)) {
+                return null;
+            } else {
+                return Arrays.asList(content1.split(","));
+            }
         } else {
             return null;
         }

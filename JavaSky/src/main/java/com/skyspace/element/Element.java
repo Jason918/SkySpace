@@ -1,5 +1,6 @@
 package com.skyspace.element;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.skyspace.Sky;
 import com.skyspace.util.ObjectProxy;
 
@@ -68,6 +69,7 @@ public abstract class Element {
         container = pool;
     }
 
+    @JsonIgnore
     public boolean isAlive() {
         boolean dead = System.currentTimeMillis() > expire;
         if (dead) {
@@ -91,6 +93,7 @@ public abstract class Element {
         this.owner = owner;
     }
 
+    @JsonIgnore
     public long getTimeout() {
         return Math.max(this.expire - System.currentTimeMillis(),0);
     }

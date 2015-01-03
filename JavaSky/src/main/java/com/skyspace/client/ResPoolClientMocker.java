@@ -2,7 +2,6 @@ package com.skyspace.client;
 
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,14 +21,24 @@ public class ResPoolClientMocker implements IResPoolClient {
     }
 
     @Override
-    public List<?> getResValue(String name) {
+    public <T> T getResValue(String name, int clock, Class<T> clazz) {
+        return null;
+    }
+
+    @Override
+    public List<Object> getResValue(String name) {
         if (StringUtils.equals(name, "temp")) {
-            List<Integer> ret = new ArrayList<Integer>();
-            for (int i = 0; i < clock; i++) {
-                ret.add((int) (Math.random() * 100));
-            }
-            return ret;
+//            List<Object> ret = new ArrayList<Integer>();
+//            for (int i = 0; i < clock; i++) {
+//                ret.add((int) (Math.random() * 100));
+//            }
+//            return ret;
         }
+        return null;
+    }
+
+    @Override
+    public <T> List<T> getResValue(String name, Class<T[]> clazz) {
         return null;
     }
 
@@ -39,9 +48,10 @@ public class ResPoolClientMocker implements IResPoolClient {
     }
 
     @Override
-    public void ticktock(float clockCount) {
-        clock += clockCount;
+    public void ticktock(double clockCount) {
+
     }
+
 
 
 }

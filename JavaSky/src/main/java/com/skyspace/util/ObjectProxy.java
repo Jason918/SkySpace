@@ -7,6 +7,8 @@ public class ObjectProxy {
     protected int port;
     protected String name;
 
+    public ObjectProxy() {
+    }
 
     public ObjectProxy(String name) {
         this.name = name;
