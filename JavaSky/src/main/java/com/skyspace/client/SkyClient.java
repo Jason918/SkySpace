@@ -1,14 +1,12 @@
 package com.skyspace.client;
 
 import com.skyspace.element.Item;
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -62,29 +60,4 @@ public class SkyClient {
             return null;
         }
     }
-
-    private List<Object> decodeContent(String content) {
-        String[] contents = content.split(",");
-        List<Object> objs = new ArrayList<Object>();
-        for (String c : contents) {
-            String decodedContent = new String(Base64.decodeBase64(c));
-            objs.add(decodedContent);
-        }
-        return objs;
-    }
-
-    private String encodeContent(Object[] contentItems) {
-        List<String> encodedContentString = new ArrayList<String>();
-        for (Object item : contentItems) {
-            String str = item.toString();
-            if (StringUtils.equals(str, "?")) {
-                encodedContentString.add(str);
-            } else {
-                encodedContentString.add(Base64.encodeBase64String(str.getBytes()));
-            }
-        }
-        return StringUtils.join(encodedContentString, ",");
-    }
-
-
 }

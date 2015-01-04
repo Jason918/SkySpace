@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.skyspace.Sky;
 import com.skyspace.util.ObjectProxy;
 
-public abstract class Element {
+public abstract class Element implements Comparable<Element>{
     /**
      * 该元素的拥有者
      */
@@ -96,6 +96,10 @@ public abstract class Element {
     @JsonIgnore
     public long getTimeout() {
         return Math.max(this.expire - System.currentTimeMillis(),0);
+    }
+
+    public int compareTo(Element e){
+        return content.compareTo(e.content);
     }
 
 }

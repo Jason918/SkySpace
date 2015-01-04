@@ -6,8 +6,6 @@ import com.skyspace.json.JSONException;
 import com.skyspace.json.JSONObject;
 import com.skyspace.util.ObjectProxy;
 
-import java.util.Date;
-
 /**
  * 用来表示元组,包括元组信息,元组的owner,元组的类型,过期时间,
  *
@@ -90,14 +88,14 @@ public class Item extends Element {
 
     @Override
     public String toString() {
-
-        return "Item\n-[owner]:" + owner
-                + "\n-[type]:0x" + Integer.toHexString(type)
-                + ",isSubscribale:" + isSubscribale()
-                + ",isAcquirable:" + isAcquirable()
-                + ",isSinglton:" + isSinglton()
-                + "\n-[tuple]:" + content
-                + "\n-[expire]:" + new Date(expire) + "\n";
+        return String.format("[content=%s]", content);
+//        return "Item\n-[owner]:" + owner
+//                + "\n-[type]:0x" + Integer.toHexString(type)
+//                + ",isSubscribale:" + isSubscribale()
+//                + ",isAcquirable:" + isAcquirable()
+//                + ",isSinglton:" + isSinglton()
+//                + "\n-[tuple]:" + content
+//                + "\n-[expire]:" + new Date(expire) + "\n";
     }
 
     private void setMemberByJSON(JSONObject jo) {

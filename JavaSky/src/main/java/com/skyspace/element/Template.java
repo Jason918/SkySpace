@@ -7,7 +7,6 @@ import com.skyspace.util.CallBack;
 import com.skyspace.util.ObjectProxy;
 
 import java.util.ArrayList;
-import java.util.Date;
 
 /**
  * 用来表示模版, 即一类元组.
@@ -166,12 +165,13 @@ public class Template extends Element {
 
     @Override
     public String toString() {
-        return "Template:\n-[owner]:" + owner
-                + "\n-[type]:" + Integer.toHexString(type)
-                + "\n-[template]:" + content
-                + "\n-[expire]:" + new Date(expire)
-                + "\n-[priority]:" + priority
-                + "\n-callback:" + callback;
+        return "[" + content + "]";
+//        return "Template:\n-[owner]:" + owner
+//                + "\n-[type]:" + Integer.toHexString(type)
+//                + "\n-[template]:" + content
+//                + "\n-[expire]:" + new Date(expire)
+//                + "\n-[priority]:" + priority
+//                + "\n-callback:" + callback;
     }
 
     @Override

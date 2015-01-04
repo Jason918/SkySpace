@@ -1,7 +1,6 @@
 package com.skyspace.restfulsky;
 
 import com.skyspace.ISkyEntry;
-import com.skyspace.SkyEntry;
 import com.skyspace.element.Item;
 import com.skyspace.element.Template;
 import org.slf4j.Logger;
@@ -23,7 +22,8 @@ public class SkyController {
 
     @PostConstruct
     void init() {
-        entry = new SkyEntry("restsky");
+        entry = new LocalSkyEntry();
+        //entry = new SkyEntry("restsky");
     }
 
     @RequestMapping("/skyentry/write")
