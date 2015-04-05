@@ -1,5 +1,7 @@
 package com.skyspace.client;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -38,4 +40,43 @@ public interface IResPoolClient {
      * @param clockCount 时钟前进的量， 精确到0.5。
      */
     void ticktock(double clockCount);
+
+
+    /**
+     * 重置资源池
+     */
+    void resetResPool();
+
+    /**
+     *  file must be in xml format.
+     * @param file
+     */
+    void addResFromFile(File file) throws IOException;
+
+
+    /**
+     * add a Res in respool
+     * @param name
+     * @param model
+     * @param update
+     */
+    void addRes(String name, String model, String update);
+
+    /**
+     *
+     * @param name
+     */
+    void deleteRes(String name);
+
+
+    /**
+     * special ticktock.
+     * ticktock until one res execute an auto update.
+     * @param force Set true if you want to force jump the clock, not ticktock one by one.
+     *              Use at your own risk.
+     */
+    void ticktockToNextUpdate(boolean force);
+
+
+    int getClock();
 }

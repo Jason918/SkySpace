@@ -18,12 +18,27 @@ import java.util.List;
 public class SkyController {
     public static Logger LOG = org.slf4j.LoggerFactory.getLogger(SkyController.class);
 
-    ISkyEntry entry;
+    private ISkyEntry entry;
+
+    synchronized ISkyEntry getEntry() {
+        return entry;
+    }
+
+    synchronized void setEntry(ISkyEntry entry) {
+        this.entry = entry;
+    }
 
     @PostConstruct
     void init() {
-        entry = new LocalSkyEntry();
-        //entry = new SkyEntry("restsky");
+        setEntry(new LocalSkyEntry());
+    }
+
+    @RequestMapping("/skyentry/reset")
+    public Boolean reset() {
+        LOG.info("resetting sky space.");
+        setEntry(new LocalSkyEntry());
+        LOG.info("write finish");
+        return true;
     }
 
     @RequestMapping("/skyentry/write")
@@ -36,7 +51,7 @@ public class SkyController {
             type = Item.TYPE_ACQUIRABLE|Item.TYPE_SUBSCRIBALE;
         }
         Item item = new Item(null, type, tuple, expire);
-        entry.write(item);
+        getEntry().write(item);
         LOG.info("write finish");
         return true;
     }
@@ -51,7 +66,7 @@ public class SkyController {
             type |= Template.TYPE_MANY;
         }
         Template tmpl = new Template(null, template, type, timeout);
-        List<Item> items = entry.read(tmpl);
+        List<Item> items = getEntry().read(tmpl);
         LOG.info("read finish");
         return items;
     }
@@ -66,7 +81,7 @@ public class SkyController {
             type |= Template.TYPE_MANY;
         }
         Template tmpl = new Template(null, template, type, timeout);
-        List<Item> items = entry.take(tmpl);
+        List<Item> items = getEntry().take(tmpl);
         LOG.info("take finish");
         return items;
     }

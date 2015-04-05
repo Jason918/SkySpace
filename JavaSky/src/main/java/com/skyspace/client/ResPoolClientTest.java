@@ -2,6 +2,8 @@ package com.skyspace.client;
 
 import org.junit.Assert;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class ResPoolClientTest {
@@ -38,4 +40,24 @@ public class ResPoolClientTest {
         client.setResValue("distance", 1234567);
         client.ticktock(0.5);
     }
+
+    @org.junit.Test
+    public void testAddResFromFile() throws IOException {
+        client.resetResPool();
+        client.addResFromFile(new File("/Users/jason/lab/proj/AeroAnt/res.xml"));
+    }
+
+    @org.junit.Test
+    public void testDeleteRes() throws IOException {
+        client.deleteRes("season");
+    }
+
+    @org.junit.Test
+    public void testTicktockToNextUpdate() throws IOException {
+        client.getClock();
+        client.ticktockToNextUpdate(false);
+        client.getClock();
+    }
+
+
 }
